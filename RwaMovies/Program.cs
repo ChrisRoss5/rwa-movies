@@ -1,7 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using RwaMovies.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<RwaMoviesContext>(options =>
+{
+    options.UseSqlServer("name=ConnectionStrings:RwaMoviesConnStr");
+});
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RwaMovies.Models;
 using System.Diagnostics;
 
@@ -6,16 +7,22 @@ namespace RwaMovies.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly RwaMoviesContext _dbContext;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(RwaMoviesContext dbContext)
         {
-            _logger = logger;
+            _dbContext = dbContext;
         }
 
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpGet("[controller]/[action]")]
+        public ActionResult<bool> TestConnection()
+        {
+            return _dbContext.Database.CanConnect();
         }
 
         public IActionResult Privacy()
