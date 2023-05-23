@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using RwaMovies.DTOs;
 using RwaMovies.Models;
 
 namespace RwaMovies.Controllers.API
@@ -14,104 +17,78 @@ namespace RwaMovies.Controllers.API
     public class TagsController : ControllerBase
     {
         private readonly RwaMoviesContext _context;
+        private readonly IMapper _mapper;
 
-        public TagsController(RwaMoviesContext context)
+        public TagsController(RwaMoviesContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        // GET: api/Tags
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetTags()
+        public async Task<ActionResult<IEnumerable<TagDTO>>> GetTags()
         {
-          if (_context.Tags == null)
-          {
-              return NotFound();
-          }
-            return await _context.Tags.ToListAsync();
+            var tags = await _context.Tags.ToListAsync();
+            return _mapper.Map<List<TagDTO>>(tags);
         }
 
-        // GET: api/Tags/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tag>> GetTag(int id)
+        public async Task<ActionResult<TagDTO>> GetTag(int id)
         {
-          if (_context.Tags == null)
-          {
-              return NotFound();
-          }
             var tag = await _context.Tags.FindAsync(id);
-
-            if (tag == null)
-            {
-                return NotFound();
-            }
-
-            return tag;
+            return tag != null ? _mapper.Map<TagDTO>(tag) : NotFound();
         }
 
-        // PUT: api/Tags/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTag(int id, Tag tag)
+        public async Task<IActionResult> PutTag(int id, TagDTO tagDTO)
         {
-            if (id != tag.Id)
-            {
+            if (!ModelState.IsValid || id != tagDTO.Id)
                 return BadRequest();
-            }
-
-            _context.Entry(tag).State = EntityState.Modified;
-
             try
             {
+                var tag = _mapper.Map<Tag>(tagDTO);
+                _context.Entry(tag).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
                 if (!TagExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
             }
-
             return NoContent();
         }
 
-        // POST: api/Tags
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Tag>> PostTag(Tag tag)
+        public async Task<IActionResult> PostTag(TagDTO tagDTO)
         {
-          if (_context.Tags == null)
-          {
-              return Problem("Entity set 'RwaMoviesContext.Tags'  is null.");
-          }
-            _context.Tags.Add(tag);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTag", new { id = tag.Id }, tag);
+            if (!ModelState.IsValid)
+                return BadRequest();
+            try
+            {
+                var tag = _mapper.Map<Tag>(tagDTO);
+                _context.Tags.Add(tag);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction("GetTag", new { id = tag.Id });
+            }
+            catch (Exception ex)
+            {
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+            }
         }
 
-        // DELETE: api/Tags/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTag(int id)
         {
-            if (_context.Tags == null)
-            {
-                return NotFound();
-            }
-            var tag = await _context.Tags.FindAsync(id);
+            var tag = await _context.Tags.Include(t => t.VideoTags).FirstOrDefaultAsync(t => t.Id == id);
             if (tag == null)
-            {
                 return NotFound();
-            }
-
             _context.Tags.Remove(tag);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

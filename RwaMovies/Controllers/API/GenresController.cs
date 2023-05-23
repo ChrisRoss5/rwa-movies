@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Azure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RwaMovies.DTOs;
 using RwaMovies.Models;
 
 namespace RwaMovies.Controllers.API
@@ -14,105 +17,87 @@ namespace RwaMovies.Controllers.API
     public class GenresController : ControllerBase
     {
         private readonly RwaMoviesContext _context;
+        private readonly IMapper _mapper;
 
-        public GenresController(RwaMoviesContext context)
+        public GenresController(RwaMoviesContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        // GET: api/Genres
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
+        public async Task<ActionResult<IEnumerable<GenreDTO>>> GetGenres()
         {
-          if (_context.Genres == null)
-          {
-              return NotFound();
-          }
-            return await _context.Genres.ToListAsync();
+            var genres = await _context.Genres.ToListAsync();
+            return _mapper.Map<List<GenreDTO>>(genres);
         }
 
-        // GET: api/Genres/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Genre>> GetGenre(int id)
+        public async Task<ActionResult<GenreDTO>> GetGenre(int id)
         {
-          if (_context.Genres == null)
-          {
-              return NotFound();
-          }
             var genre = await _context.Genres.FindAsync(id);
-
-            if (genre == null)
-            {
-                return NotFound();
-            }
-
-            return genre;
+            return genre != null ? _mapper.Map<GenreDTO>(genre) : NotFound();
         }
 
-        // PUT: api/Genres/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGenre(int id, Genre genre)
+        public async Task<IActionResult> PutGenre(int id, GenreDTO genreDTO)
         {
-            if (id != genre.Id)
-            {
+            if (!ModelState.IsValid || id != genreDTO.Id)
                 return BadRequest();
-            }
-
-            _context.Entry(genre).State = EntityState.Modified;
-
             try
             {
+                var genre = _mapper.Map<Genre>(genreDTO);
+                _context.Entry(genre).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
                 if (!GenreExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
             }
-
             return NoContent();
         }
 
-        // POST: api/Genres
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Genre>> PostGenre(Genre genre)
+        public async Task<IActionResult> PostGenre(GenreDTO genreDTO)
         {
-          if (_context.Genres == null)
-          {
-              return Problem("Entity set 'RwaMoviesContext.Genres'  is null.");
-          }
-            _context.Genres.Add(genre);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetGenre", new { id = genre.Id }, genre);
+            if (!ModelState.IsValid)
+                return BadRequest();
+            try
+            {
+                var genre = _mapper.Map<Genre>(genreDTO);
+                _context.Genres.Add(genre);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction("GetGenre", new { id = genre.Id });
+            }
+            catch (Exception ex)
+            {
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+            }
         }
 
-        // DELETE: api/Genres/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
         {
-            if (_context.Genres == null)
-            {
-                return NotFound();
-            }
             var genre = await _context.Genres.FindAsync(id);
             if (genre == null)
-            {
                 return NotFound();
+            try
+            {
+                _context.Genres.Remove(genre);
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
-
-            _context.Genres.Remove(genre);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Unable to delete genre with id={id}. Videos are using this genre.");
+            }
         }
 
         private bool GenreExists(int id)

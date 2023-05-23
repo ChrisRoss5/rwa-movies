@@ -120,12 +120,12 @@ public partial class RwaMoviesContext : DbContext
 
             entity.HasOne(d => d.Tag).WithMany(p => p.VideoTags)
                 .HasForeignKey(d => d.TagId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 .HasConstraintName("FK_VideoTag_Tag");
 
             entity.HasOne(d => d.Video).WithMany(p => p.VideoTags)
                 .HasForeignKey(d => d.VideoId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 .HasConstraintName("FK_VideoTag_Video");
         });
 

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RwaMovies.DTOs;
 using RwaMovies.Models;
 
 namespace RwaMovies.Controllers.API
@@ -14,104 +16,91 @@ namespace RwaMovies.Controllers.API
     public class VideosController : ControllerBase
     {
         private readonly RwaMoviesContext _context;
+        private readonly IMapper _mapper;
 
-        public VideosController(RwaMoviesContext context)
+        public VideosController(RwaMoviesContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        // GET: api/Videos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Video>>> GetVideos()
+        public async Task<ActionResult<IEnumerable<VideoResponse>>> GetVideos()
         {
-          if (_context.Videos == null)
-          {
-              return NotFound();
-          }
-            return await _context.Videos.ToListAsync();
+            var videos = await _context.Videos
+                .Include(v => v.Genre)
+                .Include(v => v.Image)
+                .Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
+                .ToListAsync();
+            return _mapper.Map<List<VideoResponse>>(videos);
         }
 
-        // GET: api/Videos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Video>> GetVideo(int id)
+        public async Task<ActionResult<VideoResponse>> GetVideo(int id)
         {
-          if (_context.Videos == null)
-          {
-              return NotFound();
-          }
-            var video = await _context.Videos.FindAsync(id);
-
-            if (video == null)
-            {
-                return NotFound();
-            }
-
-            return video;
+            var video = await _context.Videos
+                .Include(v => v.Genre)
+                .Include(v => v.Image)
+                .Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
+                .FirstOrDefaultAsync(v => v.Id == id);
+            return video != null ? _mapper.Map<VideoResponse>(video) : NotFound();
         }
 
-        // PUT: api/Videos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVideo(int id, Video video)
+        public async Task<IActionResult> PutVideo(int id, VideoRequest videoRequest)
         {
-            if (id != video.Id)
-            {
+            if (!ModelState.IsValid || id != videoRequest.Id)
                 return BadRequest();
-            }
-
-            _context.Entry(video).State = EntityState.Modified;
-
             try
             {
+                var video = _mapper.Map<Video>(videoRequest);
+                var existingVideoTags = await _context.VideoTags.Where(vt => vt.VideoId == id).ToListAsync();
+                var newVideoTags = videoRequest.TagIds.Select(x => new VideoTag { VideoId = id, TagId = x });
+                _context.VideoTags.RemoveRange(existingVideoTags);
+                _context.VideoTags.AddRange(newVideoTags);
+                _context.Entry(video).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
                 if (!VideoExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
             }
-
             return NoContent();
         }
 
-        // POST: api/Videos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Video>> PostVideo(Video video)
+        public async Task<IActionResult> PostVideo(VideoRequest videoRequest)
         {
-          if (_context.Videos == null)
-          {
-              return Problem("Entity set 'RwaMoviesContext.Videos'  is null.");
-          }
-            _context.Videos.Add(video);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetVideo", new { id = video.Id }, video);
+            if (!ModelState.IsValid)
+                return BadRequest();
+            try
+            {
+                var video = _mapper.Map<Video>(videoRequest);
+                video.VideoTags = videoRequest.TagIds.Select(x => new VideoTag { TagId = x }).ToList();
+                _context.Videos.Add(video);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction("GetVideo", new { id = video.Id });
+            }
+            catch (Exception ex)
+            {
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+            }
         }
 
-        // DELETE: api/Videos/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVideo(int id)
         {
-            if (_context.Videos == null)
-            {
-                return NotFound();
-            }
-            var video = await _context.Videos.FindAsync(id);
+            var video = await _context.Videos.Include(v => v.VideoTags).FirstOrDefaultAsync(v => v.Id == id);
             if (video == null)
-            {
                 return NotFound();
-            }
-
             _context.Videos.Remove(video);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
