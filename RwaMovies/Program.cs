@@ -1,13 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.Models;
-using System.Text.Json.Serialization;
+using RwaMovies.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews()/*.AddJsonOptions(x =>
-   x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)*/;
-builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 builder.Services.AddDbContext<RwaMoviesContext>(options =>
 {
     options.UseSqlServer("name=ConnectionStrings:RwaMoviesConnStr");
@@ -15,14 +13,15 @@ builder.Services.AddDbContext<RwaMoviesContext>(options =>
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IVideosService, VideosService>();
+builder.Services.AddScoped<IGenresService, GenresService>();
+builder.Services.AddScoped<ITagsService, TagsService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
@@ -35,6 +34,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Videos}/{action=Index}/{id?}");
 
 app.Run();

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Azure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
+using RwaMovies.Exceptions;
 using RwaMovies.Models;
+using RwaMovies.Services;
 
 namespace RwaMovies.Controllers.API
 {
@@ -16,27 +17,30 @@ namespace RwaMovies.Controllers.API
     [ApiController]
     public class GenresController : ControllerBase
     {
-        private readonly RwaMoviesContext _context;
-        private readonly IMapper _mapper;
+        private readonly IGenresService _genresService;
 
-        public GenresController(RwaMoviesContext context, IMapper mapper)
+        public GenresController(IGenresService genresService)
         {
-            _context = context;
-            _mapper = mapper;
+            _genresService = genresService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GenreDTO>>> GetGenres()
         {
-            var genres = await _context.Genres.ToListAsync();
-            return _mapper.Map<List<GenreDTO>>(genres);
+            return Ok(await _genresService.GetGenres());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<GenreDTO>> GetGenre(int id)
         {
-            var genre = await _context.Genres.FindAsync(id);
-            return genre != null ? _mapper.Map<GenreDTO>(genre) : NotFound();
+            try
+            {
+                return Ok(await _genresService.GetGenre(id));
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         [HttpPut("{id}")]
@@ -46,19 +50,17 @@ namespace RwaMovies.Controllers.API
                 return BadRequest();
             try
             {
-                var genre = _mapper.Map<Genre>(genreDTO);
-                _context.Entry(genre).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                await _genresService.PutGenre(id, genreDTO);
+                return NoContent();
             }
             catch (Exception ex)
             {
-                if (!GenreExists(id))
+                if (ex is NotFoundException)
                     return NotFound();
                 if (ex is DbUpdateException)
                     return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
             }
-            return NoContent();
         }
 
         [HttpPost]
@@ -68,10 +70,8 @@ namespace RwaMovies.Controllers.API
                 return BadRequest();
             try
             {
-                var genre = _mapper.Map<Genre>(genreDTO);
-                _context.Genres.Add(genre);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction("GetGenre", new { id = genre.Id });
+                var genreId = await _genresService.PostGenre(genreDTO);
+                return CreatedAtAction("GetGenre", new { id = genreId });
             }
             catch (Exception ex)
             {
@@ -84,25 +84,19 @@ namespace RwaMovies.Controllers.API
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
         {
-            var genre = await _context.Genres.FindAsync(id);
-            if (genre == null)
-                return NotFound();
             try
             {
-                _context.Genres.Remove(genre);
-                await _context.SaveChangesAsync();
+                await _genresService.DeleteGenre(id);
                 return NoContent();
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Unable to delete genre with id={id}. Videos are using this genre.");
+                if (ex is NotFoundException)
+                    return NotFound();
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
             }
-        }
-
-        private bool GenreExists(int id)
-        {
-            return (_context.Genres?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

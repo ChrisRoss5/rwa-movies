@@ -6,9 +6,10 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using RwaMovies.DTOs;
+using RwaMovies.Exceptions;
 using RwaMovies.Models;
+using RwaMovies.Services;
 
 namespace RwaMovies.Controllers.API
 {
@@ -16,27 +17,30 @@ namespace RwaMovies.Controllers.API
     [ApiController]
     public class TagsController : ControllerBase
     {
-        private readonly RwaMoviesContext _context;
-        private readonly IMapper _mapper;
+        private readonly ITagsService _tagsService;
 
-        public TagsController(RwaMoviesContext context, IMapper mapper)
+        public TagsController(ITagsService tagsService)
         {
-            _context = context;
-            _mapper = mapper;
+            _tagsService = tagsService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TagDTO>>> GetTags()
         {
-            var tags = await _context.Tags.ToListAsync();
-            return _mapper.Map<List<TagDTO>>(tags);
+            return Ok(await _tagsService.GetTags());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TagDTO>> GetTag(int id)
         {
-            var tag = await _context.Tags.FindAsync(id);
-            return tag != null ? _mapper.Map<TagDTO>(tag) : NotFound();
+            try
+            {
+                return Ok(await _tagsService.GetTag(id));
+            }
+            catch
+            {
+                return NotFound();
+            }
         }
 
         [HttpPut("{id}")]
@@ -46,19 +50,17 @@ namespace RwaMovies.Controllers.API
                 return BadRequest();
             try
             {
-                var tag = _mapper.Map<Tag>(tagDTO);
-                _context.Entry(tag).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
+                await _tagsService.PutTag(id, tagDTO);
+                return NoContent();
             }
             catch (Exception ex)
             {
-                if (!TagExists(id))
+                if (ex is NotFoundException)
                     return NotFound();
                 if (ex is DbUpdateException)
                     return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
             }
-            return NoContent();
         }
 
         [HttpPost]
@@ -68,10 +70,8 @@ namespace RwaMovies.Controllers.API
                 return BadRequest();
             try
             {
-                var tag = _mapper.Map<Tag>(tagDTO);
-                _context.Tags.Add(tag);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction("GetTag", new { id = tag.Id });
+                var tagId = await _tagsService.PostTag(tagDTO);
+                return CreatedAtAction("GetTag", new { id = tagId });
             }
             catch (Exception ex)
             {
@@ -84,17 +84,19 @@ namespace RwaMovies.Controllers.API
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTag(int id)
         {
-            var tag = await _context.Tags.Include(t => t.VideoTags).FirstOrDefaultAsync(t => t.Id == id);
-            if (tag == null)
-                return NotFound();
-            _context.Tags.Remove(tag);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        private bool TagExists(int id)
-        {
-            return (_context.Tags?.Any(e => e.Id == id)).GetValueOrDefault();
+            try
+            {
+                await _tagsService.DeleteTag(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                if (ex is NotFoundException)
+                    return NotFound();
+                if (ex is DbUpdateException)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+            }
         }
     }
 }

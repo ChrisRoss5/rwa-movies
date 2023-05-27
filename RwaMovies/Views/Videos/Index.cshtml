@@ -1,0 +1,38 @@
+﻿@model VideoGenreViewModel
+
+@{
+    ViewData["Title"] = "Videos";
+}
+
+<h1>
+    Videos
+    <a asp-action="Create" class="btn btn-primary ms-2 mb-2">Create New</a>
+</h1>
+
+<form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2">
+    <select asp-for="GenreFilter" asp-items="Model.Genres">
+        <option value="">All</option>
+    </select>
+    <input type="text" asp-for="NameFilter" placeholder="Name..." />
+    <input type="submit" value="Filter" />
+</form>
+
+<div class="row row-cols-xxl-3 row-cols-sm-2 row-cols-1 g-4 mt-4">
+    @foreach (var item in Model.Videos)
+    {
+        <a asp-action="Details" asp-route-id="@item.Id">
+            <div class="card overflow-hidden shadow-sm rounded-3 bg-white">
+                <img src="https://images.squarespace-cdn.com/content/v1/59c967729f7456ec37985037/1636390879845-IOYEH4UK4VS88YGZYYKK/56637591-550A-4CCF-984F-3DBB4E2EBE65.JPG?format=1500w"
+                     class="w-100" alt="Slika" />
+                <div class="p-3 h-100">
+                    <h5 class="text-uppercase border-2 border-bottom pb-2 mb-2">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </h5>
+                    <div class="video-description">
+                        @Html.DisplayFor(modelItem => item.Description) awdawdawd awd a dwa dawdawda awd aw da dawdawd awd a dwa dawdawda awd aw da
+                    </div>
+                </div>
+            </div>
+        </a>
+    }
+</div>
