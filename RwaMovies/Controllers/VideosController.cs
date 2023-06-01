@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,150 +9,189 @@ using RwaMovies.Services;
 
 namespace RwaMovies.Controllers
 {
-    public class VideosController : Controller
-    {
-        private readonly IVideosService _videosService;
-        private readonly IGenresService _genresService;
+	public class VideosController : Controller
+	{
+		private readonly RwaMoviesContext _context;
+		private readonly IVideosService _videosService;
+		private readonly IGenresService _genresService;
+		private readonly ITagsService _tagsService;
+		private readonly IImagesService _imagesService;
+		private readonly IMapper _mapper;
 
-        public VideosController(IVideosService videosService, IGenresService genresService)
-        {
-            _videosService = videosService;
-            _genresService = genresService;
-        }
+		public VideosController(RwaMoviesContext context, IVideosService videosService, IGenresService genresService, ITagsService tagsService, IImagesService imagesService, IMapper mapper)
+		{
+			_context = context;
+			_videosService = videosService;
+			_genresService = genresService;
+			_tagsService = tagsService;
+			_imagesService = imagesService;
+			_mapper = mapper;
+		}
 
-        public async Task<IActionResult> Index(
-            string? nameFilter, string? genreFilter, string? orderBy, string? orderDirection, int? page, int? size)
-        {
-            try
-            {
-                var videos = await _videosService.Search(nameFilter, orderBy, orderDirection, page, size);
-                var genres = await _genresService.GetGenres();
-                if (!string.IsNullOrEmpty(genreFilter))
-                    videos = videos.Where(v => v.Genre.Name == genreFilter);
-                var VideoGenreVM = new VideoGenreViewModel
-                {
-                    Videos = videos.ToList(),
-                    Genres = new SelectList(genres.Select(g => g.Name)),
-                };
-                ViewData["NameFilter"] = nameFilter;
-                ViewData["GenreFilter"] = genreFilter;
-                return View(VideoGenreVM);
-            }
-            catch
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
-            }
-        }
+		public async Task<IActionResult> Index(string? nameFilter, string? genreFilter, int? pageNum)
+		{
+			try
+			{
+				return View(new VideosVM
+				{
+					SearchResult = await _videosService.Search(new SearchParams
+					{
+						NameFilter = nameFilter,
+						GenreFilter = genreFilter,
+						PageNum = pageNum
+					}),
+					Genres = new SelectList((await _genresService.GetGenres()).Select(g => g.Name)),
+					NameFilter = nameFilter,
+					GenreFilter = genreFilter,
+				});
+			}
+			catch (Exception ex)
+			{
+				if (ex is BadRequestException)
+					return BadRequest();
+				return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+			}
+		}
 
+		public async Task<IActionResult> IndexPartial(string? nameFilter, string? genreFilter, int? pageNum)
+		{
+			try
+			{
+				var searchResult = await _videosService.Search(new SearchParams
+				{
+					NameFilter = nameFilter,
+					GenreFilter = genreFilter,
+					PageNum = pageNum
+				});
+				return PartialView("_VideoList", searchResult.Videos);
+			}
+			catch (Exception ex)
+			{
+				if (ex is BadRequestException)
+					return BadRequest();
+				return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+			}
+		}
 
-        public async Task<IActionResult> Details(int id)
-        {
-            try
-            {
-                return View(await _videosService.GetVideo(id));
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
-        }
+		public async Task<IActionResult> Details(int id)
+		{
+			try
+			{
+				return View(await _videosService.GetVideo(id));
+			}
+			catch
+			{
+				return NotFound();
+			}
+		}
 
-        public IActionResult Create()
-        {
-            /*ViewData["GenreId"] = new SelectList(_context.Genres, "Id", "Id");
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Id");*/
-            return View();
-        }
+		public async Task<IActionResult> Create()
+		{
+			await PopulateVideoViewBag();
+			return View();
+		}
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CreatedAt,Name,Description,GenreId,TotalSeconds,StreamingUrl,ImageId")] Video video)
-        {
-            /*if (ModelState.IsValid)
-            {
-                _context.Add(video);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["GenreId"] = new SelectList(_context.Genres, "Id", "Id", video.GenreId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Id", video.ImageId);*/
-            return View(video);
-        }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(VideoFormVM videoFormVM)
+		{
+			if (!ModelState.IsValid)
+			{
+				await PopulateVideoViewBag();
+				return View(videoFormVM);
+			}
+			try
+			{
+				if (videoFormVM.ImageFile != null)
+				{
+					videoFormVM.VideoRequest.ImageId =
+						await _imagesService.PostImage(videoFormVM.ImageFile);
+				}
+				int videoId = await _videosService.PostVideo(videoFormVM.VideoRequest);
+				return RedirectToAction(nameof(Details), new { id = videoId });
+			}
+			catch
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+			}
+		}
 
-        public async Task<IActionResult> Edit(int id)
-        {
-            return NotFound();
+		public async Task<IActionResult> Edit(int id)
+		{
+			try
+			{
+				var videoResponse = await _videosService.GetVideo(id);
+				await PopulateVideoViewBag();
+				return View(new VideoFormVM
+				{
+					VideoRequest = _mapper.Map<VideoRequest>(videoResponse),
+				});
+			}
+			catch
+			{
+				return NotFound();
+			}
+		}
 
-            /*var video = await _context.Videos.FindAsync(id);
-            if (video == null)
-            {
-                return NotFound();
-            }
-            ViewData["GenreId"] = new SelectList(_context.Genres, "Id", "Id", video.GenreId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Id", video.ImageId);
-            return View(video);*/
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CreatedAt,Name,Description,GenreId,TotalSeconds,StreamingUrl,ImageId")] Video video)
-        {
-            if (id != video.Id)
-            {
-                return NotFound();
-            }
-            return NotFound();
-
-            /*if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(video);
-                    await _context.SaveChangesAsync();
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(int id, VideoFormVM videoFormVM, string? imageOption)
+		{
+			if (id != videoFormVM.VideoRequest.Id)
+				return NotFound();
+			if (!ModelState.IsValid)
+			{
+				await PopulateVideoViewBag();
+				return View(videoFormVM);
+			}
+			try
+			{
+				if (imageOption == "delete")
+				{
+					await _imagesService.DeleteImage((int)videoFormVM.VideoRequest.ImageId!);
+					videoFormVM.VideoRequest.ImageId = null;
+					_context.ChangeTracker.Clear();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VideoExists(video.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["GenreId"] = new SelectList(_context.Genres, "Id", "Id", video.GenreId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Id", video.ImageId);
-            return View(video);*/
-        }
+				else if (videoFormVM.ImageFile != null)
+					if (videoFormVM.VideoRequest.ImageId != null)
+						await _imagesService.PutImage(
+							(int)videoFormVM.VideoRequest.ImageId, videoFormVM.ImageFile);
+					else
+						videoFormVM.VideoRequest.ImageId =
+							await _imagesService.PostImage(videoFormVM.ImageFile);
+				await _videosService.PutVideo(id, videoFormVM.VideoRequest);
+				return RedirectToAction(nameof(Details), new { id });
+			}
+			catch (Exception ex)
+			{
+				if (ex is NotFoundException)
+					return NotFound();
+				return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+			}
+		}
 
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                return View(await _videosService.GetVideo(id));
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            try
-            {
-                await _videosService.DeleteVideo(id);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
-        }
-    }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Delete(int id)
+		{
+			try
+			{
+				await _videosService.DeleteVideo(id);
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				if (ex is NotFoundException)
+					return NotFound();
+				return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+			}
+		}
+		private async Task PopulateVideoViewBag()
+		{
+			var genres = await _genresService.GetGenres();
+			var tags = await _tagsService.GetTags();
+			ViewBag.Genres = new SelectList(genres, "Id", "Name");
+			ViewBag.Tags = new SelectList(tags, "Id", "Name");
+		}
+	}
 }

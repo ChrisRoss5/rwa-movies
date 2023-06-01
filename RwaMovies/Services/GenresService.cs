@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Exceptions;
@@ -7,7 +6,7 @@ using RwaMovies.Models;
 
 namespace RwaMovies.Services
 {
-    public interface IGenresService
+	public interface IGenresService
     {
         Task<IEnumerable<GenreDTO>> GetGenres();
         Task<GenreDTO> GetGenre(int id);
@@ -18,7 +17,6 @@ namespace RwaMovies.Services
 
     public class GenresService : IGenresService
     {
-
         private readonly RwaMoviesContext _context;
         private readonly IMapper _mapper;
 

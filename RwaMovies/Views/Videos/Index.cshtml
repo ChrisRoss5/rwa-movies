@@ -1,38 +1,90 @@
-﻿@model VideoGenreViewModel
+﻿@model VideosVM
 
 @{
-    ViewData["Title"] = "Videos";
+	ViewData["Title"] = "Videos";
+	bool useAjax = false;
+	int pageNum = Model.SearchResult.PageNum;
+	int pageCount = Model.SearchResult.PageCount;
 }
 
-<h1>
-    Videos
-    <a asp-action="Create" class="btn btn-primary ms-2 mb-2">Create New</a>
-</h1>
+<section class="d-flex align-items-center flex-wrap g-4">
+	<h1>Videos</h1>
+	<div>
+		<a asp-action="Create" class="btn btn-primary mx-2">Create New</a>
+	</div>
+	<div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
+		<form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
+			<select asp-for="GenreFilter" asp-items="Model.Genres" class="form-select">
+				<option value="">All</option>
+			</select>
+			<input type="text" asp-for="NameFilter" placeholder="Name..." class="form-control" />
+			<button type="submit" class="btn btn-primary">Filter</button>
+		</form>
+	</div>
+</section>
 
-<form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2">
-    <select asp-for="GenreFilter" asp-items="Model.Genres">
-        <option value="">All</option>
-    </select>
-    <input type="text" asp-for="NameFilter" placeholder="Name..." />
-    <input type="submit" value="Filter" />
-</form>
+<hr />
 
-<div class="row row-cols-xxl-3 row-cols-sm-2 row-cols-1 g-4 mt-4">
-    @foreach (var item in Model.Videos)
-    {
-        <a asp-action="Details" asp-route-id="@item.Id">
-            <div class="card overflow-hidden shadow-sm rounded-3 bg-white">
-                <img src="https://images.squarespace-cdn.com/content/v1/59c967729f7456ec37985037/1636390879845-IOYEH4UK4VS88YGZYYKK/56637591-550A-4CCF-984F-3DBB4E2EBE65.JPG?format=1500w"
-                     class="w-100" alt="Slika" />
-                <div class="p-3 h-100">
-                    <h5 class="text-uppercase border-2 border-bottom pb-2 mb-2">
-                        @Html.DisplayFor(modelItem => item.Name)
-                    </h5>
-                    <div class="video-description">
-                        @Html.DisplayFor(modelItem => item.Description) awdawdawd awd a dwa dawdawda awd aw da dawdawd awd a dwa dawdawda awd aw da
-                    </div>
-                </div>
-            </div>
-        </a>
-    }
-</div>
+@if (Model.SearchResult.FilteredVideoCount > 0)
+{
+	<section id="videos-list" class="row row-cols-xxl-3 row-cols-sm-2 row-cols-1 g-4 py-4">
+		<partial name="_VideoList" model="Model.SearchResult.Videos" />
+	</section>
+	@if (pageCount > 1)
+	{
+		<nav class="d-flex justify-content-center">
+			<ul class="pagination justify-content-center flex-wrap">
+				<li class="page-item @((pageNum == 1) ? "disabled" : "")">
+					<div id="prev" class="page-link">&laquo;</div>
+				</li>
+				@for (int i = 1; i <= pageCount; i++)
+				{
+					<li class="page-item @(pageNum == i ? "active" : "")">
+						<div class="page-link">@i</div>
+					</li>
+				}
+				<li class="page-item @((pageNum == pageCount) ? "disabled" : "")">
+					<div id="next" class="page-link">&raquo;</div>
+				</li>
+			</ul>
+		</nav>
+	}
+}
+else
+{
+	<div class="alert alert-warning my-4" role="alert">No videos found.</div>
+}
+
+@section Scripts {
+	<script>
+		const useAjax = @useAjax.ToString().ToLower();
+		const pageCount = @pageCount;
+		let pageNum = @pageNum;
+		let isLoading = false;
+
+		$(".page-link").on("click", async ({ target: { id, textContent } }) => {
+			if (isLoading || pageNum == parseInt(textContent)) return;
+			if (id == "prev") pageNum--;
+			else if (id == "next") pageNum++;
+			else pageNum = parseInt(textContent)
+			isLoading = true;
+			await loadPage();
+			isLoading = false;
+		});
+
+		async function loadPage() {
+			const searchParams = new URLSearchParams(location.search);
+			searchParams.set("pageNum", pageNum);
+			if (!useAjax)
+				return location.search = searchParams.toString();
+			const html = await $.ajax(
+				`/Videos/IndexPartial?${searchParams.toString()}`
+			).fail(() => alert("Error while loading page data"));
+			$(".page-item:first-child").toggleClass("disabled", pageNum == 1);
+			$(".page-item:last-child").toggleClass("disabled", pageNum == pageCount);
+			$(".page-item.active").removeClass("active");
+			$(`.page-item:nth-child(${pageNum + 1})`).addClass("active");
+			$('#videos-list').html(html);
+		}
+	</script>
+}

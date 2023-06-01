@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RwaMovies.Models;
+﻿namespace RwaMovies.Models;
 
 public partial class User
 {

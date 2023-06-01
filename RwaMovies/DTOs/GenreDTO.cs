@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RwaMovies.DTOs;
+﻿namespace RwaMovies.DTOs;
 
 public partial class GenreDTO
 {

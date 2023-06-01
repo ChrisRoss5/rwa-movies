@@ -1,56 +1,19 @@
-﻿@model RwaMovies.Models.Video
+﻿@model VideoFormVM
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create a video";
+    ViewBag.Action = "Create";
+    ViewBag.ButtonText = "Create";
 }
 
-<h1>Create</h1>
+<h1>Create a video</h1>
 
-<h4>Video</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="GenreId" class="control-label"></label>
-                <select asp-for="GenreId" class ="form-control" asp-items="ViewBag.GenreId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="TotalSeconds" class="control-label"></label>
-                <input asp-for="TotalSeconds" class="form-control" />
-                <span asp-validation-for="TotalSeconds" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StreamingUrl" class="control-label"></label>
-                <input asp-for="StreamingUrl" class="form-control" />
-                <span asp-validation-for="StreamingUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageId" class="control-label"></label>
-                <select asp-for="ImageId" class ="form-control" asp-items="ViewBag.ImageId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<partial name="_VideoForm" />
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

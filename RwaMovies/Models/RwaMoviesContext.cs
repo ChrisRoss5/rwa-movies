@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace RwaMovies.Models;
 
@@ -111,6 +109,7 @@ public partial class RwaMoviesContext : DbContext
 
             entity.HasOne(d => d.Image).WithMany(p => p.Videos)
                 .HasForeignKey(d => d.ImageId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Video_Images");
         });
 

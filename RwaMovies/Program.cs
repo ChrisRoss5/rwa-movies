@@ -16,6 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IVideosService, VideosService>();
 builder.Services.AddScoped<IGenresService, GenresService>();
 builder.Services.AddScoped<ITagsService, TagsService>();
+builder.Services.AddScoped<IImagesService, ImagesService>();
 
 var app = builder.Build();
 

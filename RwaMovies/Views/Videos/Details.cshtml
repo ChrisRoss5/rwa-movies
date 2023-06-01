@@ -1,60 +1,69 @@
 ﻿@model VideoResponse
 
 @{
-    ViewData["Title"] = "Details";
+	ViewData["Title"] = "Video details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Video</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalSeconds)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalSeconds)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StreamingUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StreamingUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Image)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Image.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="row row-cols-xxl-2 row-cols-1 g-4">
+	<a href="@Model.StreamingUrl" id="play" class="position-relative">
+		<img id="model-image" src="@(Model.Image != null
+			? $"data:image/png;base64,{@Model.Image.Content}"
+			: "/images/no_image_placeholder.png")" class="w-100" />
+		<div class="position-absolute top-50 start-50 translate-middle w-25">
+			<img id="play-logo" src="/images/play-logo.png" class="w-100" />
+		</div>
+	</a>
+	<div>
+		<dl class="row">
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.CreatedAt)
+			</dt>
+			<dd class="col-sm-7">
+				@Html.DisplayFor(model => model.CreatedAt)
+			</dd>
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.Name)
+			</dt>
+			<dd class="col-sm-7">
+				@Html.DisplayFor(model => model.Name)
+			</dd>
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.Description)
+			</dt>
+			<dd class="col-sm-7">
+				@Html.DisplayFor(model => model.Description)
+			</dd>
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.TotalSeconds)
+			</dt>
+			<dd class="col-sm-7">
+				@Html.DisplayFor(model => model.TotalSeconds)
+			</dd>
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.StreamingUrl)
+			</dt>
+			<dd class="col-sm-7">
+				@Html.DisplayFor(model => model.StreamingUrl)
+			</dd>
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.Genre)
+			</dt>
+			<dd class="col-sm-7">
+				@Html.DisplayFor(model => model.Genre.Name)
+			</dd>
+			<dt class="col-sm-3">
+				@Html.DisplayNameFor(model => model.Tags)
+			</dt>
+			<dd class="col-sm-7">
+				@String.Join(", ", Model.Tags.Select(t => t.Name))
+			</dd>
+		</dl>
+		<hr />
+		<a asp-action="Index" class="btn btn-secondary">Back to list</a>
+		<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary ms-2">Edit</a>
+		<form asp-action="Delete" class="d-inline">
+			<input type="hidden" asp-for="@Model.Id" />
+			<input type="submit" value="Delete" class="btn btn-danger ms-2" />
+		</form>
+	</div>
 </div>

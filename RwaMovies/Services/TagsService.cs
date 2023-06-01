@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Exceptions;
@@ -7,7 +6,7 @@ using RwaMovies.Models;
 
 namespace RwaMovies.Services
 {
-    public interface ITagsService
+	public interface ITagsService
     {
         Task<IEnumerable<TagDTO>> GetTags();
         Task<TagDTO> GetTag(int id);

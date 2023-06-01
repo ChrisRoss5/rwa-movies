@@ -1,0 +1,68 @@
+﻿@model VideoFormVM
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="@ViewBag.action" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="VideoRequest.Name" class="control-label"></label>
+                <input asp-for="VideoRequest.Name" class="form-control" />
+                <span asp-validation-for="VideoRequest.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VideoRequest.Description" class="control-label"></label>
+                <input asp-for="VideoRequest.Description" class="form-control" />
+                <span asp-validation-for="VideoRequest.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VideoRequest.GenreId" class="control-label"></label>
+                <select asp-for="VideoRequest.GenreId" class="form-control" asp-items="ViewBag.Genres"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="VideoRequest.TotalSeconds" class="control-label"></label>
+                <input asp-for="VideoRequest.TotalSeconds" class="form-control" />
+                <span asp-validation-for="VideoRequest.TotalSeconds" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VideoRequest.StreamingUrl" class="control-label"></label>
+                <input asp-for="VideoRequest.StreamingUrl" class="form-control" />
+                <span asp-validation-for="VideoRequest.StreamingUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.ImageFile)</label>
+                @{
+                    bool showImageSelect = @ViewBag.action == "Edit" && Model.VideoRequest.ImageId != null;
+                }
+                @if (showImageSelect)
+                {
+                    <input type="hidden" asp-for="VideoRequest.ImageId" />
+                    <select id="image-select" name="ImageOption" class="form-select">
+                        <option value="keep">Keep Image</option>
+                        <option value="change">Change image</option>
+                        <option value="delete">Delete image</option>
+                    </select>
+                }
+                <span id="image-input-container" style="display: @(showImageSelect ? "none" : "")">
+                    <input asp-for="ImageFile" class="form-control" type="file" accept="image/png">
+                </span>
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VideoRequest.TagIds" class="control-label"></label>
+                <select asp-for="VideoRequest.TagIds" class="form-control" asp-items="ViewBag.Tags"></select>
+            </div>
+            <div class="form-group mt-3">
+                @if (@ViewBag.action == "Edit")
+                {
+                    <input type="hidden" asp-for="@Model.VideoRequest.Id" />
+                    <a asp-action="Details" asp-route-id="@Model.VideoRequest.Id" class="btn btn-secondary">Back to Video</a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                }
+                <input type="submit" value="@ViewBag.buttonText" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

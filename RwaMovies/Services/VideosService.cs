@@ -1,122 +1,152 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Exceptions;
 using RwaMovies.Models;
 using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
 
 namespace RwaMovies.Services
 {
-    public interface IVideosService
-    {
-        Task<IEnumerable<VideoResponse>> GetVideos();
-        Task<VideoResponse> GetVideo(int id);
-        Task<IEnumerable<VideoResponse>> Search(
-                       string? nameFilter, string? orderBy, string? orderDirection, int? page, int? size);
-        Task PutVideo(int id, VideoRequest videoRequest);
-        Task<int> PostVideo(VideoRequest videoRequest);
-        Task DeleteVideo(int id);
-    }
+	public class SearchParams
+	{
+		public string? NameFilter { get; set; }
+		public string? GenreFilter { get; set; }
+		public string? OrderBy { get; set; }
+		public string? OrderDirection { get; set; }
+		public int? PageNum { get; set; }
+		public int? PageSize { get; set; }
+	}
 
-    public class VideosService : IVideosService
-    {
-        private readonly RwaMoviesContext _context;
-        private readonly IMapper _mapper;
+	public class SearchResult
+	{
+		public List<VideoResponse> Videos { get; set; } = null!;
+		public int FilteredVideoCount { get; set; }
+		public int PageSize { get; set; }
+		public int PageNum { get; set; }
+		public int PageCount { get; set; }
+	}
 
-        public VideosService(RwaMoviesContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
+	public interface IVideosService
+	{
+		Task<IEnumerable<VideoResponse>> GetVideos();
+		Task<VideoResponse> GetVideo(int id);
+		Task<SearchResult> Search(SearchParams sp);
+		Task PutVideo(int id, VideoRequest videoRequest);
+		Task<int> PostVideo(VideoRequest videoRequest);
+		Task DeleteVideo(int id);
+	}
 
-        public async Task<IEnumerable<VideoResponse>> GetVideos()
-        {
-            var videos = await _context.Videos
-                .Include(v => v.Genre)
-                .Include(v => v.Image)
-                .Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
-                .ToListAsync();
-            return _mapper.Map<List<VideoResponse>>(videos);
-        }
+	public class VideosService : IVideosService
+	{
+		private readonly RwaMoviesContext _context;
+		private readonly IMapper _mapper;
 
-        public async Task<VideoResponse> GetVideo(int id)
-        {
-            var video = await _context.Videos
-                .Where(v => v.Id == id)
-                .Include(v => v.Genre)
-                .Include(v => v.Image)
-                .Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
-                .FirstOrDefaultAsync();
-            if (video is null)
-                throw new NotFoundException();
-            return _mapper.Map<VideoResponse>(video);
-        }
+		public VideosService(RwaMoviesContext context, IMapper mapper)
+		{
+			_context = context;
+			_mapper = mapper;
+		}
 
-        public async Task<IEnumerable<VideoResponse>> Search(
-            string? nameFilter, string? orderBy, string? orderDirection, int? page, int? size)
-        {
-            orderBy ??= "Id";
-            orderDirection ??= "asc";
-            page ??= 1;
-            size ??= 5;
-            if (!new[] { "Id", "Name", "TotalSeconds" }.Contains(orderBy) ||
-                !new[] { "asc", "desc" }.Contains(orderDirection) || page < 1 || size < 1)
-                throw new BadRequestException();
-            var videos = await _context.Videos
-                .Where(v => v.Name.Contains(nameFilter ?? ""))
-                .OrderBy($"{orderBy} {orderDirection}")
-                .Skip((int)((page - 1) * size))
-                .Take((int)size)
-                .Include(v => v.Genre)
-                .Include(v => v.Image)
-                .Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
-                .ToListAsync();
-            return _mapper.Map<List<VideoResponse>>(videos);
-        }
+		public async Task<IEnumerable<VideoResponse>> GetVideos()
+		{
+			var videos = await _context.Videos
+				.Include(v => v.Genre)
+				.Include(v => v.Image)
+				.Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
+				.ToListAsync();
+			return _mapper.Map<List<VideoResponse>>(videos);
+		}
 
-        public async Task PutVideo(int id, VideoRequest videoRequest)
-        {
-            try
-            {
-                var video = _mapper.Map<Video>(videoRequest);
-                var existingVideoTags = await _context.VideoTags.Where(vt => vt.VideoId == id).ToListAsync();
-                var newVideoTags = videoRequest.TagIds.Select(x => new VideoTag { VideoId = id, TagId = x });
-                _context.VideoTags.RemoveRange(existingVideoTags);
-                _context.VideoTags.AddRange(newVideoTags);
-                _context.Entry(video).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-            }
-            catch
-            {
-                if (!VideoExists(id))
-                    throw new NotFoundException();
-                throw;
-            }
-        }
+		public async Task<VideoResponse> GetVideo(int id)
+		{
+			var video = await _context.Videos
+				.Where(v => v.Id == id)
+				.Include(v => v.Genre)
+				.Include(v => v.Image)
+				.Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
+				.FirstOrDefaultAsync();
+			if (video is null)
+				throw new NotFoundException();
+			return _mapper.Map<VideoResponse>(video);
+		}
 
-        public async Task<int> PostVideo(VideoRequest videoRequest)
-        {
-            var video = _mapper.Map<Video>(videoRequest);
-            video.VideoTags = videoRequest.TagIds.Select(x => new VideoTag { TagId = x }).ToList();
-            _context.Videos.Add(video);
-            await _context.SaveChangesAsync();
-            return video.Id;
-        }
+		public async Task<SearchResult> Search(SearchParams sp)
+		{
+			sp.OrderBy ??= "Id";
+			sp.OrderDirection ??= "asc";
+			sp.PageNum ??= 1;
+			sp.PageSize ??= 6;
+			if (!new[] { "Id", "Name", "TotalSeconds" }.Contains(sp.OrderBy) ||
+				!new[] { "asc", "desc" }.Contains(sp.OrderDirection) || sp.PageNum < 1 || sp.PageSize < 1)
+				throw new BadRequestException();
+			var videosFiltered = _context.Videos
+				.Where(v => !string.IsNullOrEmpty(sp.NameFilter) ? v.Name.Contains(sp.NameFilter) : true)
+				.Where(v => !string.IsNullOrEmpty(sp.GenreFilter) ? v.Genre.Name == sp.GenreFilter : true);
+			var filteredVideoCount = await videosFiltered.CountAsync();
+			var videos = await videosFiltered
+				.OrderBy($"{sp.OrderBy} {sp.OrderDirection}")
+				.Skip((int)((sp.PageNum - 1) * sp.PageSize))
+				.Take((int)sp.PageSize)
+				.Include(v => v.Genre)
+				.Include(v => v.Image)
+				.Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
+				.ToListAsync();
+			return new SearchResult
+			{
+				Videos = _mapper.Map<List<VideoResponse>>(videos).ToList(),
+				FilteredVideoCount = filteredVideoCount,
+				PageSize = (int)sp.PageSize,
+				PageNum = (int)sp.PageNum,
+				PageCount = (int)Math.Ceiling(filteredVideoCount / (double)sp.PageSize)
+			};
+		}
 
-        public async Task DeleteVideo(int id)
-        {
-            var video = await _context.Videos.Include(v => v.VideoTags).FirstOrDefaultAsync(v => v.Id == id);
-            if (video == null)
-                throw new NotFoundException();
-            _context.Videos.Remove(video);
-            await _context.SaveChangesAsync();
-        }
+		public async Task PutVideo(int id, VideoRequest videoRequest)
+		{
+			try
+			{
+				var video = _mapper.Map<Video>(videoRequest);
+				var existingVideoTags = await _context.VideoTags.Where(vt => vt.VideoId == id).ToListAsync();
+				_context.VideoTags.RemoveRange(existingVideoTags);
+				if (videoRequest.TagIds != null)
+				{
+					var newVideoTags = videoRequest.TagIds.Select(x => new VideoTag { VideoId = id, TagId = x });
+					_context.VideoTags.AddRange(newVideoTags);
+				}
+				var state = _context.Entry(video).State;
+				_context.Entry(video).State = EntityState.Modified;
+				await _context.SaveChangesAsync();
+			}
+			catch
+			{
+				if (!VideoExists(id))
+					throw new NotFoundException();
+				throw;
+			}
+		}
 
-        private bool VideoExists(int id)
-        {
-            return (_context.Videos?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
-    }
+		public async Task<int> PostVideo(VideoRequest videoRequest)
+		{
+			var video = _mapper.Map<Video>(videoRequest);
+			if (videoRequest.TagIds != null)
+				video.VideoTags = videoRequest.TagIds.Select(x => new VideoTag { TagId = x }).ToList();
+			_context.Videos.Add(video);
+			await _context.SaveChangesAsync();
+			return video.Id;
+		}
+
+		public async Task DeleteVideo(int id)
+		{
+			var video = await _context.Videos.Include(v => v.VideoTags).FirstOrDefaultAsync(v => v.Id == id);
+			if (video == null)
+				throw new NotFoundException();
+			_context.Videos.Remove(video);
+			await _context.SaveChangesAsync();
+		}
+
+		private bool VideoExists(int id)
+		{
+			return (_context.Videos?.Any(e => e.Id == id)).GetValueOrDefault();
+		}
+	}
 }

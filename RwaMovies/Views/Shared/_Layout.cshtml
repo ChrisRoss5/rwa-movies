@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="~/RwaMovies.styles.css" asp-append-version="true" />
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <header>
+    <header class="mb-3">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Videos" asp-action="Index">RwaMovies</a>
@@ -23,13 +23,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Videos" asp-action="Index">Videos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Videos" asp-action="Index">Videos</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Genres" asp-action="Index">Genres</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Videos" asp-action="Index">Videos</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Tags" asp-action="Index">Tags</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Videos" asp-action="Index">Videos</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Countries" asp-action="Index">Countries</a>
                         </li>
                     </ul>
                 </div>
@@ -42,7 +42,7 @@
         </main>
     </div>
 
-    <footer class="border-top text-muted mt-auto">
+    <footer class="border-top text-muted mt-auto text-center">
         <div class="container my-4">
             &copy; 2023 - RwaMovies - Kristijan Rosandić
         </div>

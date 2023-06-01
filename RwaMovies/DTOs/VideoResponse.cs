@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace RwaMovies.DTOs;
 
 public partial class VideoResponse
 {
-    public int? Id { get; set; }
+    public int Id { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+	[Display(Name = "Created at")]
+	public DateTime CreatedAt { get; set; }
 
     public string Name { get; set; } = null!;
 
@@ -15,9 +15,11 @@ public partial class VideoResponse
 
     public GenreDTO Genre { get; set; } = null!;
 
-    public int TotalSeconds { get; set; }
+	[Display(Name = "Total seconds")]
+	public int TotalSeconds { get; set; }
 
-    public string? StreamingUrl { get; set; }
+	[Display(Name = "Streaming URL")]
+	public string? StreamingUrl { get; set; }
 
     public ImageDTO? Image { get; set; }
 

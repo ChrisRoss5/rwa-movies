@@ -1,0 +1,15 @@
+﻿#model-image {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+}
+
+#play-logo {
+    filter: drop-shadow(0 0 15px black);
+    transition: transform 250ms, opacity 250ms;
+    opacity: 0.7;
+}
+
+#play:hover #play-logo {
+    transform: scale(1.1);
+    opacity: 1;
+}
