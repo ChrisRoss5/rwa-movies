@@ -2,7 +2,6 @@
 
 @{
 	ViewData["Title"] = "Videos";
-	bool useAjax = false;
 	int pageNum = Model.SearchResult.PageNum;
 	int pageCount = Model.SearchResult.PageCount;
 }
@@ -10,7 +9,7 @@
 <section class="d-flex align-items-center flex-wrap g-4">
 	<h1>Videos</h1>
 	<div>
-		<a asp-action="Create" class="btn btn-primary mx-2">Create New</a>
+		<a asp-action="Create" class="btn btn-primary mx-3">Create New</a>
 	</div>
 	<div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
 		<form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
@@ -30,61 +29,13 @@
 	<section id="videos-list" class="row row-cols-xxl-3 row-cols-sm-2 row-cols-1 g-4 py-4">
 		<partial name="_VideoList" model="Model.SearchResult.Videos" />
 	</section>
-	@if (pageCount > 1)
-	{
-		<nav class="d-flex justify-content-center">
-			<ul class="pagination justify-content-center flex-wrap">
-				<li class="page-item @((pageNum == 1) ? "disabled" : "")">
-					<div id="prev" class="page-link">&laquo;</div>
-				</li>
-				@for (int i = 1; i <= pageCount; i++)
-				{
-					<li class="page-item @(pageNum == i ? "active" : "")">
-						<div class="page-link">@i</div>
-					</li>
-				}
-				<li class="page-item @((pageNum == pageCount) ? "disabled" : "")">
-					<div id="next" class="page-link">&raquo;</div>
-				</li>
-			</ul>
-		</nav>
-	}
+
+	ViewBag.useAjax = true;
+	ViewBag.PageCount = pageCount;
+	ViewBag.PageNum = pageNum;
+	<partial name="_Pagination" />
 }
 else
 {
 	<div class="alert alert-warning my-4" role="alert">No videos found.</div>
-}
-
-@section Scripts {
-	<script>
-		const useAjax = @useAjax.ToString().ToLower();
-		const pageCount = @pageCount;
-		let pageNum = @pageNum;
-		let isLoading = false;
-
-		$(".page-link").on("click", async ({ target: { id, textContent } }) => {
-			if (isLoading || pageNum == parseInt(textContent)) return;
-			if (id == "prev") pageNum--;
-			else if (id == "next") pageNum++;
-			else pageNum = parseInt(textContent)
-			isLoading = true;
-			await loadPage();
-			isLoading = false;
-		});
-
-		async function loadPage() {
-			const searchParams = new URLSearchParams(location.search);
-			searchParams.set("pageNum", pageNum);
-			if (!useAjax)
-				return location.search = searchParams.toString();
-			const html = await $.ajax(
-				`/Videos/IndexPartial?${searchParams.toString()}`
-			).fail(() => alert("Error while loading page data"));
-			$(".page-item:first-child").toggleClass("disabled", pageNum == 1);
-			$(".page-item:last-child").toggleClass("disabled", pageNum == pageCount);
-			$(".page-item.active").removeClass("active");
-			$(`.page-item:nth-child(${pageNum + 1})`).addClass("active");
-			$('#videos-list').html(html);
-		}
-	</script>
 }

@@ -1,0 +1,40 @@
+﻿<script>
+    $(window).on("popstate", () => loadPage());
+
+    initEventListeners();
+
+    function initEventListeners() {
+        $("main a").on("click", handleLinkClick);
+        $("main form").on("submit", handleFormSubmit);
+    }
+
+    async function handleLinkClick(e) {
+        e.preventDefault();
+        await loadPage(this.href);
+        window.history.pushState(null, null, this.href);
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const res = await $.ajax({
+            url: this.action,
+            type: this.method,
+            data: $(this).serialize()
+        }).fail(() => alert("Error while submitting form data"));
+        if (res == "Success")
+            return $("main form .btn.btn-secondary").click();
+        updatePage(res);
+    }
+
+    async function loadPage(url = location.href) {
+        const html = await $.ajax(url)
+            .fail(() => alert("Error while loading page data"));
+        updatePage(html);
+    }
+
+    function updatePage(html) {
+        $("main").html(html);
+        document.title = $("main h1").text() + " - RwaMovies";
+        initEventListeners();
+    }
+</script>

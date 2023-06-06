@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RwaMovies.DTOs;
 
 namespace RwaMovies.Models;
 
@@ -132,4 +133,6 @@ public partial class RwaMoviesContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    public DbSet<RwaMovies.DTOs.TagDTO>? TagDTO { get; set; }
 }

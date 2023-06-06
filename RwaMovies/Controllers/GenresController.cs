@@ -1,158 +1,159 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using RwaMovies.DTOs;
+using RwaMovies.Exceptions;
 using RwaMovies.Models;
+using RwaMovies.Services;
+using RwaMovies.Extensions;
 
 namespace RwaMovies.Controllers
 {
-	public class GenresController : Controller
+    public class GenresController : Controller
     {
         private readonly RwaMoviesContext _context;
+        private readonly IGenresService _genresService;
 
-        public GenresController(RwaMoviesContext context)
+        public GenresController(RwaMoviesContext context, IGenresService genresService)
         {
             _context = context;
+            _genresService = genresService;
         }
 
-        // GET: Genres
         public async Task<IActionResult> Index()
         {
-            var v = await _context.Genres.ToListAsync();
-              return _context.Genres != null ? 
-                          View(v) :
-                          Problem("Entity set 'RwaMoviesContext.Genres'  is null.");
+            var genres = await _genresService.GetGenres();
+            if (Request.IsAjaxRequest()) 
+                return PartialView(genres);
+            return View(genres);
         }
 
-        // GET: Genres/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null || _context.Genres == null)
+            try
             {
-                return NotFound();
+                var genre = await _genresService.GetGenre(id);
+                if (Request.IsAjaxRequest())
+					return PartialView(genre);
+                return View(genre);
             }
-
-            var genre = await _context.Genres
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (genre == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                if (ex is NotFoundException)
+                    return NotFound();
+                throw;
             }
-
-            return View(genre);
         }
 
-        // GET: Genres/Create
         public IActionResult Create()
         {
+            if (Request.IsAjaxRequest())
+                return PartialView();
             return View();
         }
 
-        // POST: Genres/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description")] Genre genre)
+        public async Task<IActionResult> Create(GenreDTO genreDTO)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(genre);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (Request.IsAjaxRequest())
+                    return PartialView(genreDTO);
+                return View(genreDTO);
             }
-            return View(genre);
+            await _genresService.PostGenre(genreDTO);
+            if (Request.IsAjaxRequest())
+                return Ok("Success");
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Genres/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null || _context.Genres == null)
+            try
             {
-                return NotFound();
+                var genre = await _genresService.GetGenre(id);
+                if (Request.IsAjaxRequest())
+                    return PartialView(genre);
+                return View(genre);
             }
-
-            var genre = await _context.Genres.FindAsync(id);
-            if (genre == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                if (ex is NotFoundException)
+                    return NotFound();
+                throw;
             }
-            return View(genre);
         }
 
-        // POST: Genres/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] Genre genre)
+        public async Task<IActionResult> Edit(int id, GenreDTO genreDTO)
         {
-            if (id != genre.Id)
-            {
+            if (id != genreDTO.Id)
                 return NotFound();
-            }
-
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(genre);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GenreExists(genre.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                if (Request.IsAjaxRequest())
+                    return PartialView(genreDTO);
+                return View(genreDTO);
+            }
+            try
+            {
+                await _genresService.PutGenre(id, genreDTO);
+                if (Request.IsAjaxRequest())
+                    return Ok("Success");
                 return RedirectToAction(nameof(Index));
             }
-            return View(genre);
+            catch (Exception ex)
+            {
+                if (ex is NotFoundException)
+                    return NotFound();
+                throw;
+            }
         }
 
-        // GET: Genres/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || _context.Genres == null)
+            try
             {
-                return NotFound();
+                var genre = await _genresService.GetGenre(id);
+                if (Request.IsAjaxRequest())
+                    return PartialView(genre);
+                return View(genre);
             }
-
-            var genre = await _context.Genres
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (genre == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                if (ex is NotFoundException)
+                    return NotFound();
+                throw;
             }
-
-            return View(genre);
         }
 
-        // POST: Genres/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Genres == null)
+            try
             {
-                return Problem("Entity set 'RwaMoviesContext.Genres'  is null.");
+                await _genresService.DeleteGenre(id);
+                if (Request.IsAjaxRequest())
+                    return Ok("Success");
+                return RedirectToAction(nameof(Index));
             }
-            var genre = await _context.Genres.FindAsync(id);
-            if (genre != null)
+            catch (Exception ex)
             {
-                _context.Genres.Remove(genre);
+                if (ex.InnerException is SqlException sqlEx && sqlEx.Message.Contains("FK_Video_Genre"))
+                {
+                    ModelState.AddModelError("", "Cannot delete genre because it is used in a video.");
+                    var genre = await _genresService.GetGenre(id);
+                    if (Request.IsAjaxRequest())
+                        return PartialView(genre);
+                    return View(genre);
+                }
+                if (ex is NotFoundException)
+                    return NotFound();
+                throw;
             }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool GenreExists(int id)
-        {
-          return (_context.Genres?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

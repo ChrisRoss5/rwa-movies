@@ -1,11 +1,10 @@
-﻿@model GenreDTO
-
+﻿@model RwaMovies.DTOs.TagDTO
 
 @{
-    ViewData["Title"] = "Genre details";
+    ViewData["Title"] = "Tag details";
 }
 
-<h1>Genre details</h1>
+<h1>Tag details</h1>
 
 <div>
     <dl class="row">
@@ -15,21 +14,9 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
     </dl>
 </div>
 <div>
     <a asp-action="Index" class="btn btn-secondary">Back to list</a>
     <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary ms-2">Edit</a>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_AjaxSupport");
-    }
-}

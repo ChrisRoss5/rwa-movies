@@ -1,7 +1,7 @@
-﻿@model IEnumerable<GenreDTO>
+﻿@model IEnumerable<RwaMovies.DTOs.TagDTO>
 
 @{
-    ViewData["Title"] = "Genres";
+    ViewData["Title"] = "Tags";
 }
 
 <section class="d-flex align-items-center flex-wrap g-4">
@@ -17,9 +17,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
             <th></th>
         </tr>
     </thead>
@@ -30,9 +27,6 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
                 <td class="d-flex flex-wrap gap-1 justify-content-end">
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary ms-2">Edit</a>
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary">Details</a>
@@ -42,9 +36,3 @@
         }
     </tbody>
 </table>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_AjaxSupport");
-    }
-}
