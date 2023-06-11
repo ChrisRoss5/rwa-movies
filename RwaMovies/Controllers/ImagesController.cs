@@ -6,12 +6,10 @@ namespace RwaMovies.Controllers
 {
 	public class ImagesController : Controller
 	{
-		private readonly RwaMoviesContext _context;
 		private readonly IImagesService _imagesService;
 
-		public ImagesController(RwaMoviesContext context, IImagesService imagesService)
+		public ImagesController(IImagesService imagesService)
 		{
-			_context = context;
 			_imagesService = imagesService;
 		}
 

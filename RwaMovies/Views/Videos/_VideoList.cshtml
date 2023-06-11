@@ -2,19 +2,21 @@
 
 @foreach (var item in Model)
 {
-	<a asp-action="Details" asp-route-id="@item.Id">
-		<div class="card overflow-hidden shadow-sm rounded-3 bg-white">
-			<img src="@(item.Image != null
-				? $"/Images/Image/{item.Image.Id}"
-				: "/images/no_image_placeholder.png")" class="w-100" />
-			<div class="p-3 h-100">
-				<h5 class="text-uppercase border-2 border-bottom pb-2 mb-2">
-					@Html.DisplayFor(modelItem => item.Name)
-				</h5>
-				<div class="video-description">
-					@Html.DisplayFor(modelItem => item.Description)
-				</div>
-			</div>
-		</div>
-	</a>
+    <a asp-action="Details" asp-route-id="@item.Id">
+        <div class="card overflow-hidden shadow-sm rounded-3 bg-white">
+            <div class="overflow-hidden">
+                <img src="@(item.ImageId != null
+				    ? $"/Images/Image/{item.ImageId}"
+				    : "/images/no_image_placeholder.png")" class="w-100" />
+            </div>
+            <div class="p-3 h-100">
+                <h5 class="text-uppercase border-2 border-bottom pb-2 mb-2">
+                    @Html.DisplayFor(modelItem => item.Name)
+                </h5>
+                <div class="video-description">
+                    @Html.DisplayFor(modelItem => item.Description)
+                </div>
+            </div>
+        </div>
+    </a>
 }

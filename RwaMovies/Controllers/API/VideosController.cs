@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Services;
 using RwaMovies.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RwaMovies.Controllers.API
 {
-	[Route("api/[controller]")]
+    [Authorize]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class VideosController : ControllerBase
 	{

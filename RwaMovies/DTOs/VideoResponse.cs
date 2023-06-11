@@ -21,7 +21,7 @@ public partial class VideoResponse
 	[Display(Name = "Streaming URL")]
 	public string? StreamingUrl { get; set; }
 
-    public ImageDTO? Image { get; set; }
+    public int? ImageId { get; set; }
 
     public List<TagDTO> Tags { get; set; } = null!;
 }

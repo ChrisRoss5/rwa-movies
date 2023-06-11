@@ -51,7 +51,6 @@ namespace RwaMovies.Services
 		{
 			var videos = await _context.Videos
 				.Include(v => v.Genre)
-				.Include(v => v.Image)
 				.Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
 				.ToListAsync();
 			return _mapper.Map<List<VideoResponse>>(videos);
@@ -62,7 +61,6 @@ namespace RwaMovies.Services
 			var video = await _context.Videos
 				.Where(v => v.Id == id)
 				.Include(v => v.Genre)
-				.Include(v => v.Image)
 				.Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
 				.FirstOrDefaultAsync();
 			if (video is null)
@@ -88,7 +86,6 @@ namespace RwaMovies.Services
 				.Skip((int)((sp.PageNum - 1) * sp.PageSize))
 				.Take((int)sp.PageSize)
 				.Include(v => v.Genre)
-				.Include(v => v.Image)
 				.Include(v => v.VideoTags).ThenInclude(vt => vt.Tag)
 				.ToListAsync();
 			return new SearchResult

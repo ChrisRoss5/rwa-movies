@@ -6,8 +6,8 @@
 
 <div class="row row-cols-xxl-2 row-cols-1 g-4">
     <a href="@Model.StreamingUrl" id="play" class="position-relative">
-        <img id="model-image" src="@(Model.Image != null
-			? $"data:image/png;base64,{@Model.Image.Content}"
+        <img id="model-image" src="@(Model.ImageId != null
+			? $"/Images/Image/{Model.ImageId}"
 			: "/images/no_image_placeholder.png")" class="w-100" />
         @if (Model.StreamingUrl != null)
         {
@@ -63,10 +63,7 @@
         </dl>
         <hr />
         <a asp-action="Index" class="btn btn-secondary">Back to list</a>
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary ms-2">Edit</a>
-        <form asp-action="Delete" class="d-inline">
-            <input type="hidden" asp-for="@Model.Id" />
-            <input type="submit" value="Delete" class="btn btn-danger ms-2" />
-        </form>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
     </div>
 </div>

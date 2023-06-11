@@ -1,0 +1,62 @@
+﻿@model VideoResponse
+
+@{
+    ViewData["Title"] = "Delete video";
+}
+
+<h1>Delete video</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.CreatedAt)
+        </dt>
+        <dd class="col-sm-7">
+            @Html.DisplayFor(model => model.CreatedAt)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-7">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-7">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.TotalSeconds)
+        </dt>
+        <dd class="col-sm-7">
+            @Html.DisplayFor(model => model.TotalSeconds)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.StreamingUrl)
+        </dt>
+        <dd class="col-sm-7">
+            @Html.DisplayFor(model => model.StreamingUrl)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Genre)
+        </dt>
+        <dd class="col-sm-7">
+            @Html.DisplayFor(model => model.Genre.Name)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Tags)
+        </dt>
+        <dd class="col-sm-7">
+            @String.Join(", ", Model.Tags.Select(t => t.Name))
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <a asp-action="Index" class="btn btn-secondary">Back to list</a>
+        <input type="submit" value="Delete" class="btn btn-danger" />
+    </form>
+</div>

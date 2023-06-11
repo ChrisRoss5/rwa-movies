@@ -142,9 +142,23 @@ namespace RwaMovies.Controllers
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                return View(await _videosService.GetVideo(id));
+            }
+            catch (Exception ex)
+            {
+                if (ex is NotFoundException)
+                    return NotFound();
+                throw;
+            }
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
             {
