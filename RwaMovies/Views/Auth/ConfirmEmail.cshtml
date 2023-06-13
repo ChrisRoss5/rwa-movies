@@ -1,0 +1,9 @@
+﻿<div class="text-center alert @(ViewBag.Success ? "alert-success" : "alert-danger")">
+    @ViewBag.Message
+</div>
+@if (ViewBag.Success)
+{
+    <div class="text-center">
+        <a href="/auth/login" class="btn btn-primary">Login</a>
+    </div>
+}

@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,10 +17,10 @@ builder.Services.AddDbContext<RwaMoviesContext>(options =>
     options.UseSqlServer("name=ConnectionStrings:RwaMoviesConnStr"));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(o =>
+builder.Services.AddSwaggerGen(options =>
 {
-    o.SwaggerDoc("v1", new OpenApiInfo { Title = "RwaMovies API", Version = "v1" });
-    o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "RwaMovies API", Version = "v1" });
+    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Description = "JWT Authorization header using the Bearer scheme.",
@@ -26,7 +28,7 @@ builder.Services.AddSwaggerGen(o =>
         In = ParameterLocation.Header,
         Scheme = JwtBearerDefaults.AuthenticationScheme
     });
-    o.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -44,12 +46,12 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
         var jwtKey = builder.Configuration["JWT:Key"];
         var jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKey);
-        o.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["JWT:Issuer"],
@@ -59,10 +61,21 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(jwtKeyBytes),
             ValidateLifetime = true,
         };
+    })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
     });
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-    options.SuppressModelStateInvalidFilter = true);
-builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+builder.Services.AddTransient<IMailService, MailService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVideosService, VideosService>();
 builder.Services.AddScoped<IGenresService, GenresService>();
 builder.Services.AddScoped<ITagsService, TagsService>();

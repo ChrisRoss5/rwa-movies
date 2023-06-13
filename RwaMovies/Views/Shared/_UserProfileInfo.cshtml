@@ -1,12 +1,4 @@
-﻿@model RwaMovies.DTOs.Auth.UserResponse
-
-@{
-    ViewData["Title"] = "Activate, Deactivate or Delete user";
-}
-
-<h1>Activate, Deactivate or Delete user</h1>
-
-<hr />
+﻿@model UserResponse
 
 <div>
     <dl class="row">
@@ -49,12 +41,15 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Email)
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Phone)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Phone)
-        </dd>
+        @if (Model.Phone != null)
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Phone)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Phone)
+            </dd>
+        }
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.IsConfirmed)
         </dt>
@@ -68,14 +63,4 @@
             @Html.DisplayFor(model => model.CountryOfResidence)
         </dd>
     </dl>
-
-    <a asp-action="Index" class="btn btn-secondary d-inline-block">Back to list</a>
-    <form asp-action="Toggle" class="d-inline-block">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="@(Model.DeletedAt != null ? "Activate" : "Deactivate")" class="btn btn-warning" />
-    </form>
-    <form asp-action="Delete" class="d-inline-block">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" />
-    </form>
 </div>

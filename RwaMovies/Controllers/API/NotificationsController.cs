@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Models;
-using System.Net.Mail;
+using RwaMovies.Services;
 
 namespace RwaMovies.Controllers.API
 {
@@ -13,11 +13,13 @@ namespace RwaMovies.Controllers.API
     {
         private readonly RwaMoviesContext _context;
         private readonly IMapper _mapper;
+        private readonly IMailService _mail;
 
-        public NotificationsController(RwaMoviesContext context, IMapper mapper)
+        public NotificationsController(RwaMoviesContext context, IMapper mapper, IMailService mail)
         {
             _context = context;
             _mapper = mapper;
+            _mail = mail;
         }
 
         [HttpGet]
@@ -81,38 +83,17 @@ namespace RwaMovies.Controllers.API
             return Ok(await _context.Notifications.CountAsync(x => !x.SentAt.HasValue));
         }
 
-        [HttpPost("[action]")]
-        public ActionResult SendAllUnsent()
+        [HttpGet("[action]")]
+        public async Task<ActionResult> SendAllUnsent()
         {
-            var client = new SmtpClient("127.0.0.1", 25);
-            var sender = "admin@my-cool-webapi.com";
-            try
+            var notifications = await _context.Notifications.Where(x => !x.SentAt.HasValue).ToListAsync();
+            foreach (var notification in notifications.Take(1))
             {
-                var unsentNotifications = _context.Notifications.Where(x => !x.SentAt.HasValue);
-                foreach (var notification in unsentNotifications)
-                {
-                    try
-                    {
-                        var mail = new MailMessage(
-                            from: new MailAddress(sender),
-                            to: new MailAddress(notification.ReceiverEmail));
-                        mail.Subject = notification.Subject;
-                        mail.Body = notification.Body;
-                        client.Send(mail);
-                        notification.SentAt = DateTime.UtcNow;
-                        _context.SaveChanges();
-                    }
-                    catch (Exception)
-                    {
-                        // Black hole for notification is bad handling :(
-                    }
-                }
-                return Ok();
+                await _mail.Send(notification.ReceiverEmail, notification.Subject, notification.Body);
+                notification.SentAt = DateTime.Now;
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         private bool NotificationExists(int id)

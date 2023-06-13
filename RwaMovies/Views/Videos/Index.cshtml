@@ -1,41 +1,52 @@
 ﻿@model VideosVM
 
 @{
-	ViewData["Title"] = "Videos";
-	int pageNum = Model.SearchResult.PageNum;
-	int pageCount = Model.SearchResult.PageCount;
+    ViewData["Title"] = "Videos";
+    int pageNum = Model.SearchResult.PageNum;
+    int pageCount = Model.SearchResult.PageCount;
 }
 
 <section class="d-flex align-items-center flex-wrap g-4">
-	<h1>Videos</h1>
-	<div>
-		<a asp-action="Create" class="btn btn-primary mx-3">Create New</a>
-	</div>
-	<div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
-		<form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
-			<select asp-for="GenreFilter" asp-items="Model.Genres" class="form-select">
-				<option value="">All</option>
-			</select>
-			<input type="text" asp-for="NameFilter" placeholder="Name..." class="form-control" />
-			<button type="submit" class="btn btn-primary">Filter</button>
-		</form>
-	</div>
+    <h1>Videos</h1>
+    <div>
+        <a asp-action="Create" class="btn btn-primary mx-3">Create New</a>
+    </div>
+    <div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
+        <form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
+            <select asp-for="GenreFilter" asp-items="Model.Genres" class="form-select">
+                <option value="">All</option>
+            </select>
+            <input type="text" asp-for="NameFilter" placeholder="Name..." class="form-control" />
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
 </section>
 
 <hr />
 
 @if (Model.SearchResult.FilteredVideoCount > 0)
 {
-	<section id="videos-list" class="row row-cols-xxl-3 row-cols-sm-2 row-cols-1 g-4 py-4">
-		<partial name="_VideoList" model="Model.SearchResult.Videos" />
-	</section>
+    <section id="videos-list" class="row row-cols-xxl-3 row-cols-sm-2 row-cols-1 g-4 py-4">
+        <partial name="_VideoList" model="Model.SearchResult.Videos" />
+    </section>
 
-	ViewBag.useAjax = true;
-	ViewBag.PageCount = pageCount;
-	ViewBag.PageNum = pageNum;
-	<partial name="_Pagination" />
+    ViewBag.useAjax = true;
+    ViewBag.PageCount = pageCount;
+    ViewBag.PageNum = pageNum;
+    <partial name="_Pagination" />
 }
 else
 {
-	<div class="alert alert-warning my-4" role="alert">No videos found.</div>
+    <div class="alert alert-warning my-4" role="alert">No videos found.</div>
+}
+
+@section Scripts{
+    <script>
+        $("button[type=submit]").click(() => {
+            $("input, select").each(function () {
+                if ($(this).val().trim() == "")
+                    $(this).prop("disabled", true);
+            });
+        });
+    </script>
 }

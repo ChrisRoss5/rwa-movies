@@ -61,7 +61,6 @@
                 @String.Join(", ", Model.Tags.Select(t => t.Name))
             </dd>
         </dl>
-        <hr />
         <a asp-action="Index" class="btn btn-secondary">Back to list</a>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
         <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>

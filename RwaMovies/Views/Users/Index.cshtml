@@ -1,4 +1,4 @@
-﻿@model IEnumerable<RwaMovies.Models.User>
+﻿@model RwaMovies.DTOs.Auth.UsersVM
 
 @{
     ViewData["Title"] = "Users";
@@ -9,36 +9,79 @@
     <div>
         <a asp-action="Create" class="btn btn-primary mx-3">Create New</a>
     </div>
+    <div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
+        <form asp-controller="Users" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
+            <input type="text" asp-for="FirstNameFilter" placeholder="First name..." class="form-control" />
+            <input type="text" asp-for="LastNameFilter" placeholder="Last name..." class="form-control" />
+            <input type="text" asp-for="UsernameFilter" placeholder="Username..." class="form-control" />
+            <select asp-for="CountryOfResidenceFilter" asp-items="Model.Countries" class="form-select">
+                <option value="">All</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
 </section>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Username)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+@if (Model.Users.Count > 0)
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Username)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Email)
-                </td>
-                <td class="d-flex flex-wrap gap-1 justify-content-end">
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].FirstName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].LastName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].Username)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Users[0].CountryOfResidence)
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Users)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Username)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CountryOfResidence)
+                    </td>
+                    <td class="d-flex flex-wrap gap-1 justify-content-end">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-secondary">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-warning">
+                            @(item.DeletedAt != null ? "Activate" : "Deactivate") / Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning my-4" role="alert">No users found.</div>
+}
+
+@section Scripts{
+    <script>
+        $("button[type=submit]").click(() => {
+            $("input, select").each(function () {
+                if ($(this).val().trim() == "")
+                    $(this).prop("disabled", true);
+            });
+        });
+    </script>
+}

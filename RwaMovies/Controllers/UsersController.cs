@@ -2,166 +2,162 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using RwaMovies.DTOs.Auth;
 using RwaMovies.Models;
+using RwaMovies.Services;
 
 namespace RwaMovies.Controllers
 {
     public class UsersController : Controller
     {
         private readonly RwaMoviesContext _context;
+        private readonly IAuthService _authService;
+        private readonly IMapper _mapper;
 
-        public UsersController(RwaMoviesContext context)
+        public UsersController(RwaMoviesContext context, IMapper mapper, IAuthService authService)
         {
             _context = context;
+            _mapper = mapper;
+            _authService = authService;
         }
 
-        // GET: Users
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? firstNameFilter, string? lastNameFilter, string? usernameFilter, string? countryOfResidenceFilter)
         {
-            var rwaMoviesContext = _context.Users.Include(u => u.CountryOfResidence);
-            return View(await rwaMoviesContext.ToListAsync());
-        }
-
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Users == null)
+            var users = await _context.Users
+                .Include(u => u.CountryOfResidence)
+                .Where(u => (string.IsNullOrEmpty(firstNameFilter) || u.FirstName.Contains(firstNameFilter))
+                    && (string.IsNullOrEmpty(lastNameFilter) || u.LastName.Contains(lastNameFilter))
+                    && (string.IsNullOrEmpty(usernameFilter) || u.Username.Contains(usernameFilter))
+                    && (string.IsNullOrEmpty(countryOfResidenceFilter) || u.CountryOfResidence.Name == countryOfResidenceFilter))
+                .ToListAsync();
+            var countries = await _context.Countries.ToListAsync();
+            return View(new UsersVM
             {
-                return NotFound();
-            }
+                Users = _mapper.Map<List<UserResponse>>(users),
+                Countries = new SelectList(countries.Select(c => c.Name)),
+                FirstNameFilter = firstNameFilter,
+                LastNameFilter = lastNameFilter,
+                UsernameFilter = usernameFilter,
+                CountryOfResidenceFilter = countryOfResidenceFilter,
+            });
+        }
 
+        public async Task<IActionResult> Details(int id)
+        {
             var user = await _context.Users
                 .Include(u => u.CountryOfResidence)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
-            {
                 return NotFound();
-            }
-
-            return View(user);
+            return View(_mapper.Map<UserResponse>(user));
         }
 
-        // GET: Users/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CountryOfResidenceId"] = new SelectList(_context.Countries, "Id", "Id");
+            await PopulateUsersViewBag();
             return View();
         }
 
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CreatedAt,DeletedAt,Username,FirstName,LastName,Email,PwdHash,PwdSalt,Phone,IsConfirmed,SecurityToken,CountryOfResidenceId")] User user)
+        public async Task<IActionResult> Create(UserRequestAdmin userRequestAdmin)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await PopulateUsersViewBag();
+                return View(userRequestAdmin);
             }
-            ViewData["CountryOfResidenceId"] = new SelectList(_context.Countries, "Id", "Id", user.CountryOfResidenceId);
-            return View(user);
+            try
+            {
+                await _authService.Register(userRequestAdmin.UserRequest, userRequestAdmin.IsConfirmed);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                await PopulateUsersViewBag();
+                return View(userRequestAdmin);
+            }
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null || _context.Users == null)
-            {
-                return NotFound();
-            }
-
             var user = await _context.Users.FindAsync(id);
             if (user == null)
-            {
                 return NotFound();
-            }
-            ViewData["CountryOfResidenceId"] = new SelectList(_context.Countries, "Id", "Id", user.CountryOfResidenceId);
-            return View(user);
+            await PopulateUsersViewBag();
+            return View(new UserRequestAdmin
+            {
+                UserRequest = _mapper.Map<UserRequest>(user),
+                IsConfirmed = user.IsConfirmed
+            });
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CreatedAt,DeletedAt,Username,FirstName,LastName,Email,PwdHash,PwdSalt,Phone,IsConfirmed,SecurityToken,CountryOfResidenceId")] User user)
+        public async Task<IActionResult> Edit(int id, UserRequestAdmin userRequestAdmin)
         {
-            if (id != user.Id)
-            {
+            var userRequest = userRequestAdmin.UserRequest;
+            if (id != userRequest.Id)
                 return NotFound();
-            }
-
-            if (ModelState.IsValid)
+            var passwordsMatch = userRequest.Password1 == userRequest.Password2;
+            if (!ModelState.IsValid || !passwordsMatch)
             {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CountryOfResidenceId"] = new SelectList(_context.Countries, "Id", "Id", user.CountryOfResidenceId);
-            return View(user);
-        }
-
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Users == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.Users
-                .Include(u => u.CountryOfResidence)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set 'RwaMoviesContext.Users'  is null.");
+                if (!passwordsMatch)
+                    ModelState.AddModelError("", "Passwords do not match.");
+                await PopulateUsersViewBag();
+                return View(userRequestAdmin);
             }
             var user = await _context.Users.FindAsync(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-            }
-            
+            if (user == null)
+                return NotFound();
+            var modifiedUser = _mapper.Map(userRequest, user);
+            modifiedUser.IsConfirmed = userRequestAdmin.IsConfirmed;
+            _context.Entry(modifiedUser).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool UserExists(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-          return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
+            var user = await _context.Users
+                .Include(u => u.CountryOfResidence)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (user == null)
+                return NotFound();
+            return View(_mapper.Map<UserResponse>(user));
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id, bool? toggle)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
+            if (toggle == null || !toggle.Value)
+                _context.Users.Remove(user);
+            else
+                user.DeletedAt = user.DeletedAt == null ? DateTime.Now : null;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost, ActionName("Toggle")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleConfirmed(int id)
+        {
+            return await DeleteConfirmed(id, true);
+        }
+
+        private async Task PopulateUsersViewBag()
+        {
+            var countries = await _context.Countries.ToListAsync();
+            ViewBag.CountryOfResidenceId = new SelectList(countries, "Id", "Name");
         }
     }
 }

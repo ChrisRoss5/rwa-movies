@@ -1,0 +1,16 @@
+﻿@model UserResponse
+
+@{
+    ViewData["Title"] = "My profile";
+}
+
+<h1>My profile</h1>
+
+<hr />
+
+<partial name="_UserProfileInfo" />
+
+<div>
+    Todo
+    <a asp-action="ChangePassword" class="btn btn-primary">Change password</a>
+</div>

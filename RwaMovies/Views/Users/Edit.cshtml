@@ -1,88 +1,29 @@
-﻿@model RwaMovies.Models.User
+﻿@model UserRequestAdmin
 
 @{
     ViewData["Title"] = "Edit user";
+    ViewBag.Action = "Edit";
+    ViewBag.ButtonText = "Save";
 }
 
 <h1>Edit user</h1>
 
 <hr />
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DeletedAt" class="control-label"></label>
-                <input asp-for="DeletedAt" class="form-control" />
-                <span asp-validation-for="DeletedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PwdHash" class="control-label"></label>
-                <input asp-for="PwdHash" class="form-control" />
-                <span asp-validation-for="PwdHash" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PwdSalt" class="control-label"></label>
-                <input asp-for="PwdSalt" class="form-control" />
-                <span asp-validation-for="PwdSalt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsConfirmed" /> @Html.DisplayNameFor(model => model.IsConfirmed)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="SecurityToken" class="control-label"></label>
-                <input asp-for="SecurityToken" class="form-control" />
-                <span asp-validation-for="SecurityToken" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CountryOfResidenceId" class="control-label"></label>
-                <select asp-for="CountryOfResidenceId" class="form-control" asp-items="ViewBag.CountryOfResidenceId"></select>
-                <span asp-validation-for="CountryOfResidenceId" class="text-danger"></span>
-            </div>
-            <div class="form-group mt-3">
-                <a asp-action="Index" class="btn btn-secondary">Back to list</a>
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+<partial name="_UserForm" />
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $("#password-select").on("change", function () {
+            $("#password-fieldset").css("display", this.value == "change" ? "" : "none");
+        });
+        $("input[type='submit']").click(() => {
+            if ($("#password-select").val() == "keep")
+                $("input[type='password']").val("keep-password");
+        });
+    </script>
 }

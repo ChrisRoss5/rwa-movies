@@ -1,10 +1,14 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Org.BouncyCastle.Asn1.IsisMtt.Ocsp;
 using RwaMovies.DTOs;
 using RwaMovies.DTOs.Auth;
 using RwaMovies.Models;
+using RwaMovies.Services;
+using System.Security.Claims;
 using System.Security.Cryptography;
+
 
 namespace RwaMovies.Mappers
 {
@@ -24,17 +28,27 @@ namespace RwaMovies.Mappers
             CreateMap<TagDTO, Tag>();
             CreateMap<NotificationRequest, Notification>()
                 .ForMember(d => d.CreatedAt, o => o.MapFrom(u => DateTime.UtcNow));
-            CreateMap<RegisterRequest, User>()
+            CreateMap<UserRequest, User>()
                 .ForMember(d => d.CreatedAt, o => o.MapFrom(u => DateTime.UtcNow))
-                .ForMember(d => d.PwdSalt, o => o.MapFrom(u => Convert.ToBase64String(RandomNumberGenerator.GetBytes(128 / 8))))
-                .ForMember(d => d.PwdHash, o => o.MapFrom((u, d) => Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                    password: u.Password,
-                    salt: Convert.FromBase64String(d.PwdSalt),
-                    prf: KeyDerivationPrf.HMACSHA256,
-                    iterationCount: 100000,
-                    numBytesRequested: 256 / 8))))
-                .ForMember(d => d.SecurityToken, o => o.MapFrom(u => Convert.ToBase64String(RandomNumberGenerator.GetBytes(256 / 8))));
-            CreateMap<User, RegisterResponse>();
+                .ForMember(d => d.Username, o => o.MapFrom(u => u.Username.Trim()))
+                .ForMember(d => d.PwdSalt, o =>
+                {
+                    o.PreCondition(u => u.Password1 != "keep-password");
+                    o.MapFrom(u => Convert.ToBase64String(AuthUtils.GenerateSalt()));
+                })
+                .ForMember(d => d.PwdHash, o =>
+                {
+                    o.PreCondition(u => u.Password1 != "keep-password");
+                    o.MapFrom((u, d) => Convert.ToBase64String(AuthUtils.HashPassword(u.Password1, Convert.FromBase64String(d.PwdSalt))));
+                })
+                .ForMember(d => d.SecurityToken, o =>
+                {
+                    o.PreCondition(u => u.Password1 != "keep-password");
+                    o.MapFrom(u => Convert.ToBase64String(AuthUtils.GenerateSecurityToken()));
+                });
+            CreateMap<User, UserResponse>()
+                .ForMember(d => d.CountryOfResidence, o => o.MapFrom(u => u.CountryOfResidence.Name));
+            CreateMap<User, UserRequest>();
         }
     }
 }
