@@ -1,0 +1,7 @@
+﻿<h1>@ViewBag.Title</h1>
+@if (User.IsInRole("Admin"))
+{
+    <div>
+        <a asp-action="Create" class="btn btn-primary mx-3">Create New</a>
+    </div>
+}

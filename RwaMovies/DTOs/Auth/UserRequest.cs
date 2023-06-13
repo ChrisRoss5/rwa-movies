@@ -6,7 +6,7 @@ namespace RwaMovies.DTOs.Auth
     public class UserRequest
     {
         public int? Id { get; set; }
-        [StringLength(50, MinimumLength = 6)]
+        [StringLength(50, MinimumLength = 3)]
         public string Username { get; set; } = null!;
         [DisplayName("Password")]
         public string Password1 { get; set; } = null!;

@@ -97,7 +97,7 @@ namespace RwaMovies.Services
         public string GetRole(User user)
         {
             // The given database doesn't have a role column, so I'm just hardcoding it here
-            return user.Username == "admin" ? "admin" : "user";
+            return user.Username.ToLower() == "admin" ? "Admin" : "User";
         }
 
         public async Task<string> GetJwtToken(AuthRequest request)

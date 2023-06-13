@@ -63,12 +63,14 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             await PopulateVideosViewBag();
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(VideoFormVM videoFormVM)
@@ -87,6 +89,7 @@ namespace RwaMovies.Controllers
             return RedirectToAction(nameof(Details), new { id = videoId });
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -106,6 +109,7 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, VideoFormVM videoFormVM, string? imageOption)
@@ -143,6 +147,7 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -157,6 +162,7 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

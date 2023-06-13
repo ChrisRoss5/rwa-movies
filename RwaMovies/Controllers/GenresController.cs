@@ -5,6 +5,8 @@ using RwaMovies.Exceptions;
 using RwaMovies.Models;
 using RwaMovies.Services;
 using RwaMovies.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace RwaMovies.Controllers
 {
@@ -44,6 +46,7 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             if (Request.IsAjaxRequest())
@@ -51,6 +54,7 @@ namespace RwaMovies.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(GenreDTO genreDTO)
@@ -67,6 +71,7 @@ namespace RwaMovies.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -84,7 +89,7 @@ namespace RwaMovies.Controllers
             }
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, GenreDTO genreDTO)
@@ -112,6 +117,7 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -129,6 +135,7 @@ namespace RwaMovies.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

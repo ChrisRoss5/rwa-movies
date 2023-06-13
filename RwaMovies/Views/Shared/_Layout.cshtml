@@ -13,14 +13,14 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Videos" asp-action="Index">RwaMovies</a>
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                            aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                        <ul class="navbar-nav flex-grow-1 flex-wrap">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 flex-wrap">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Videos" asp-action="Index">Videos</a>
                             </li>
@@ -33,20 +33,25 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Countries" asp-action="Index">Countries</a>
                             </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Users</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" href="/swagger" target="_blank">
-                                    Swagger
-                                    <img class="icon" src="~/images/new-tab-icon.png" />
-                                </a>
-                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Users</a>
+                                </li>
+                            }
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Profile">My profile</a>
                             </li>
-                        </ul>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/swagger" target="_blank">
+                                Swagger
+                                <img class="icon" src="~/images/new-tab-icon.png" />
+                            </a>
+                        </li>
+                    </ul>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
                         <div class="text-end">
                             <span>Signed in as <b>@User.Identity.Name</b></span>
                             <form asp-action="Logout" asp-controller="Auth" class="d-inline-block">
@@ -55,8 +60,8 @@
                                 </button>
                             </form>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </nav>
     </header>

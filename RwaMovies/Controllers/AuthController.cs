@@ -138,8 +138,9 @@ namespace RwaMovies.Controllers
 
         public async Task<IActionResult> Profile()
         {
-            var userFirstName = HttpContext.User.Identity?.Name;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.FirstName == userFirstName);
+            var user = await _context.Users
+                .Include(u => u.CountryOfResidence)
+                .FirstOrDefaultAsync(u => u.Username == HttpContext.User.Identity!.Name);
             return View(_mapper.Map<UserResponse>(user));
         }
 

@@ -7,10 +7,7 @@
 }
 
 <section class="d-flex align-items-center flex-wrap g-4">
-    <h1>Videos</h1>
-    <div>
-        <a asp-action="Create" class="btn btn-primary mx-3">Create New</a>
-    </div>
+    <partial name="_SectionTitle" />
     <div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
         <form asp-controller="Videos" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
             <select asp-for="GenreFilter" asp-items="Model.Genres" class="form-select">
