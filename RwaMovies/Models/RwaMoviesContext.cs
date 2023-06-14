@@ -133,5 +133,5 @@ public partial class RwaMoviesContext : DbContext
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
-    public DbSet<RwaMovies.DTOs.TagDTO>? TagDTO { get; set; }
+    public DbSet<RwaMovies.SharedModels.TagDTO>? TagDTO { get; set; }
 }

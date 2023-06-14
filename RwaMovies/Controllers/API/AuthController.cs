@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RwaMovies.DTOs.Auth;
+using RwaMovies.SharedModels.Auth;
 using RwaMovies.Models;
 using RwaMovies.Services;
 

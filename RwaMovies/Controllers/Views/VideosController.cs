@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using RwaMovies.DTOs;
+using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
 using RwaMovies.Extensions;
 using RwaMovies.Models;
 using RwaMovies.Services;
+using RwaMovies.ViewModels;
 
-namespace RwaMovies.Controllers
+namespace RwaMovies.Controllers.Views
 {
     public class VideosController : Controller
     {

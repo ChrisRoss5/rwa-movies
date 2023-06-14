@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using RwaMovies.Models;
-using RwaMovies.DTOs.Auth;
+using RwaMovies.SharedModels.Auth;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Web;

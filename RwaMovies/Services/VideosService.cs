@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.DTOs;
+using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
 using RwaMovies.Models;
 using System.Linq.Dynamic.Core;

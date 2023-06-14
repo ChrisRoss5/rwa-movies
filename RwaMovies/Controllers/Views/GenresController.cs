@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using RwaMovies.DTOs;
+using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
 using RwaMovies.Models;
 using RwaMovies.Services;
 using RwaMovies.Extensions;
 using Microsoft.AspNetCore.Authorization;
 
-namespace RwaMovies.Controllers
+namespace RwaMovies.Controllers.Views
 {
     public class GenresController : Controller
     {
@@ -23,7 +23,7 @@ namespace RwaMovies.Controllers
         public async Task<IActionResult> Index()
         {
             var genres = await _genresService.GetGenres();
-            if (Request.IsAjaxRequest()) 
+            if (Request.IsAjaxRequest())
                 return PartialView(genres);
             return View(genres);
         }
@@ -34,7 +34,7 @@ namespace RwaMovies.Controllers
             {
                 var genre = await _genresService.GetGenre(id);
                 if (Request.IsAjaxRequest())
-					return PartialView(genre);
+                    return PartialView(genre);
                 return View(genre);
             }
             catch (Exception ex)

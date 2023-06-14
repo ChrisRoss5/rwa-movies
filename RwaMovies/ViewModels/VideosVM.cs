@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using RwaMovies.Services;
 
-namespace RwaMovies.DTOs
+namespace RwaMovies.ViewModels
 {
     public class VideosVM
     {

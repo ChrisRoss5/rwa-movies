@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace RwaMovies.DTOs.Auth
+namespace RwaMovies.SharedModels.Auth
 {
     public class UserRequest
     {

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using RwaMovies.DTOs;
-using RwaMovies.DTOs.Auth;
+using RwaMovies.SharedModels;
+using RwaMovies.SharedModels.Auth;
 using RwaMovies.Models;
 using RwaMovies.Services;
 

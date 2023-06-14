@@ -1,10 +1,11 @@
-﻿using RwaMovies.DTOs.Validations;
+﻿using RwaMovies.SharedModels;
+using RwaMovies.Validations;
 using RwaMovies.Services;
 using System.ComponentModel.DataAnnotations;
 
-namespace RwaMovies.DTOs
+namespace RwaMovies.ViewModels
 {
-    public partial class VideoFormVM
+    public class VideoFormVM
     {
         public VideoRequest VideoRequest { get; set; } = null!;
         [Display(Name = "Image")]

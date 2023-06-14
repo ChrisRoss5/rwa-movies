@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RwaMovies.DTOs;
+using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
 using RwaMovies.Models;
 using RwaMovies.Services;
 
-namespace RwaMovies.Controllers
+namespace RwaMovies.Controllers.Views
 {
     public class TagsController : Controller
     {

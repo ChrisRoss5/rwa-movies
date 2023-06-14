@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using RwaMovies.SharedModels.Auth;
 
-namespace RwaMovies.DTOs.Auth
+namespace RwaMovies.ViewModels
 {
     public class UsersVM
     {

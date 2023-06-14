@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using RwaMovies.Services;
-using RwaMovies.DTOs.Auth;
+using RwaMovies.SharedModels.Auth;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
 using RwaMovies.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace RwaMovies.Controllers
+namespace RwaMovies.Controllers.Views
 {
     public class AuthController : Controller
     {
@@ -27,7 +27,7 @@ namespace RwaMovies.Controllers
 
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
-        {            
+        {
             if (IsAuthenticated())
                 return Redirect("~/");
             ViewBag.RegisteredMessage = TempData["RegisteredMessage"];

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace RwaMovies.DTOs.Auth
+namespace RwaMovies.SharedModels.Auth
 {
     public class UserResponse
     {

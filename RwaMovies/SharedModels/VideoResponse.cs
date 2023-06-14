@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RwaMovies.DTOs
+namespace RwaMovies.SharedModels
 {
     public class VideoResponse
     {

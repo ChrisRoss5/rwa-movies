@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.DTOs;
+using RwaMovies.SharedModels;
 using RwaMovies.Models;
+using RwaMovies.ViewModels;
 
-namespace RwaMovies.Controllers
+namespace RwaMovies.Controllers.Views
 {
     public class CountriesController : Controller
     {

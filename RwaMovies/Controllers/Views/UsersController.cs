@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.DTOs.Auth;
+using RwaMovies.SharedModels.Auth;
 using RwaMovies.Models;
 using RwaMovies.Services;
+using RwaMovies.ViewModels;
 
-namespace RwaMovies.Controllers
+namespace RwaMovies.Controllers.Views
 {
     [Authorize(Roles = "Admin")]
     public class UsersController : Controller
@@ -63,7 +64,7 @@ namespace RwaMovies.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UserRequestAdmin userRequestAdmin)
+        public async Task<IActionResult> Create(UserRequestAdminVM userRequestAdmin)
         {
             if (!ModelState.IsValid)
             {
@@ -89,7 +90,7 @@ namespace RwaMovies.Controllers
             if (user == null)
                 return NotFound();
             await PopulateUsersViewBag();
-            return View(new UserRequestAdmin
+            return View(new UserRequestAdminVM
             {
                 UserRequest = _mapper.Map<UserRequest>(user),
                 IsConfirmed = user.IsConfirmed
@@ -98,7 +99,7 @@ namespace RwaMovies.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UserRequestAdmin userRequestAdmin)
+        public async Task<IActionResult> Edit(int id, UserRequestAdminVM userRequestAdmin)
         {
             var userRequest = userRequestAdmin.UserRequest;
             if (id != userRequest.Id)

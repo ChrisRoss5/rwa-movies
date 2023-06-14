@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RwaMovies.DTOs;
+using RwaMovies.SharedModels;
 using RwaMovies.Services;
 using RwaMovies.Exceptions;
 using Microsoft.AspNetCore.Authorization;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RwaMovies.DTOs.Validations
+namespace RwaMovies.Validations
 {
 	public class AllowedExtensionsAttribute : ValidationAttribute
 	{

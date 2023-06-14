@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RwaMovies.DTOs
+namespace RwaMovies.SharedModels
 {
-    public partial class NotificationRequest
+    public class NotificationRequest
     {
         public int? Id { get; set; }
         [StringLength(256)]

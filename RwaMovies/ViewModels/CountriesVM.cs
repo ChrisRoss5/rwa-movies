@@ -1,4 +1,6 @@
-﻿namespace RwaMovies.DTOs
+﻿using RwaMovies.SharedModels;
+
+namespace RwaMovies.ViewModels
 {
     public class CountriesVM
     {
