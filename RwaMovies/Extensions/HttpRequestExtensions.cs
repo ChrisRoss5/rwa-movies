@@ -7,7 +7,7 @@
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
             if (request.Headers != null)
-                return request.Headers["X-Requested-With"] == "XMLHttpRequest";
+                return request.Headers["X-Requested-With"] == "XMLHttpRequest";  // jQuery header, not a standard
             return false;
         }
     }

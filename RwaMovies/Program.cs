@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RwaMovies.Extensions;
 using RwaMovies.Models.DAL;
 using RwaMovies.Services;
 using System.Net;
@@ -16,12 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<RwaMoviesContext>(options =>
-    options.UseSqlServer("name=ConnectionStrings:RwaMoviesConnStr"));
+    options.UseSqlServer("name=ConnectionStrings:" +
+        (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
+            ? "RwaMoviesConnStrProd" : "RwaMoviesConnStr")));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "RwaMovies API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "RwaMovies API",
+        Version = "v1"
+    });
     options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -94,15 +100,14 @@ builder.Services.AddScoped<IVideosService, VideosService>();
 builder.Services.AddScoped<IGenresService, GenresService>();
 builder.Services.AddScoped<ITagsService, TagsService>();
 builder.Services.AddScoped<IImagesService, ImagesService>();
+builder.WebHost.UseStaticWebAssets();  // Necessary for production
 
 var app = builder.Build();
-
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsProduction())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
@@ -110,17 +115,6 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles(new StaticFileOptions
-{
-    RequestPath = "/StaticFiles",
-    FileProvider = new PhysicalFileProvider(
-           Path.Combine(builder.Environment.ContentRootPath, "StaticFiles")),
-    OnPrepareResponse = (ctx) =>
-    {
-        if (!ctx.Context.User.IsInRole("Admin"))
-            ctx.Context.Response.Redirect("/Auth/AccessDenied?ReturnUrl=" + ctx.Context.Request.Path);
-    }
-});
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Videos}/{action=Index}/{id?}"

@@ -30,9 +30,6 @@ public partial class RwaMoviesContext : DbContext
 
     public virtual DbSet<VideoTag> VideoTags { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:RwaMoviesConnStr");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Country>(entity =>

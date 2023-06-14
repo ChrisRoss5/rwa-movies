@@ -9,7 +9,6 @@ namespace RwaMovies.Models.Shared.Auth
         public DateTime CreatedAt { get; set; }
         [DisplayName("Deactivated at")]
         public DateTime? DeletedAt { get; set; }
-        [DisplayName("User name")]
         public string Username { get; set; } = null!;
         [DisplayName("First name")]
         public string FirstName { get; set; } = null!;

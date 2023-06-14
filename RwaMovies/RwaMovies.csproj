@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="StaticFiles\Notifications.html" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\css\site.css" />
     <None Include="wwwroot\favicon.ico" />
     <None Include="wwwroot\images\no_image_placeholder.png" />
@@ -72,6 +68,7 @@
     <None Include="wwwroot\lib\jquery\dist\jquery.min.js" />
     <None Include="wwwroot\lib\jquery\dist\jquery.min.map" />
     <None Include="wwwroot\lib\jquery\LICENSE.txt" />
+    <None Include="wwwroot\sites\Notifications.html" />
   </ItemGroup>
 
   <ItemGroup>
