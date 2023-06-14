@@ -5,6 +5,7 @@ namespace RwaMovies.DTOs.Validations
 	public class MaxFileSizeAttribute : ValidationAttribute
 	{
 		private readonly int _maxFileSize;
+
 		public MaxFileSizeAttribute(int maxFileSize)
 		{
 			_maxFileSize = maxFileSize;
