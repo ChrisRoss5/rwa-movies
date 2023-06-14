@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using RwaMovies.Extensions;
+using RwaMovies.Controllers.API;
 using RwaMovies.Models.DAL;
 using RwaMovies.Services;
 using System.Net;
@@ -100,6 +100,7 @@ builder.Services.AddScoped<IVideosService, VideosService>();
 builder.Services.AddScoped<IGenresService, GenresService>();
 builder.Services.AddScoped<ITagsService, TagsService>();
 builder.Services.AddScoped<IImagesService, ImagesService>();
+builder.Services.AddSignalR();
 builder.WebHost.UseStaticWebAssets();  // Necessary for production
 
 var app = builder.Build();
@@ -115,6 +116,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<NotificationsHub>("/NotificationsHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Videos}/{action=Index}/{id?}"

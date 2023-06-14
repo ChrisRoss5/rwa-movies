@@ -1,87 +1,99 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notifications</title>
+    <title>Notifications - RwaMovies</title>
     <style>
-        body {
-            display: grid;
-            place-content: center;
-            height: 100vh;
-            margin: 0;
-        }
+      body {
+        display: grid;
+        place-content: center;
+        height: 100vh;
+        margin: 0;
+      }
 
-        body,
-        button {
-            font: 1.5rem system-ui;
-        }
+      body,
+      button {
+        font: 1.5rem system-ui;
+      }
 
-        #container {
-            border: 1px solid #ccc;
-            padding: 2rem;
-        }
+      #container {
+        border: 1px solid #ccc;
+        padding: 2rem;
+      }
 
-        #message {
-            margin-bottom: 2rem;
-        }
+      #message {
+        margin-bottom: 2rem;
+      }
 
-        #buttons-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+      #buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
 
-        button {
-            flex: 1;
-        }
+      button {
+        flex: 1;
+      }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <a href="/">↩ Return</a>
     <div id="container">
-        <div id="message">
-            Number of unsent notifications: <span id="unsent-count"></span>
-        </div>
-        <div id="buttons-container">
-            <button onclick="getCount()">Refresh</button>
-            <button onclick="sendAll()">Send All</button>
-        </div>
+      <div id="message">
+        Number of unsent notifications: <span id="unsent-count"></span>
+      </div>
+      <div id="buttons-container">
+        <button>Refresh</button>
+        <button>Send All</button>
+      </div>
     </div>
+    <script type="module">
+      import "https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js";
 
-    <script>
-        const buttons = document.querySelectorAll("button");
-        const unsentCount = localStorage.getItem("unsent-count");
-        unsentCount !== null ? showCount(unsentCount) : getCount();
+      const unsentCountEl = document.getElementById("unsent-count");
+      const [refreshBtn, sendAllBtn] = document.querySelectorAll("button");
+      refreshBtn.onclick = getCount;
+      sendAllBtn.onclick = sendAll;
 
-        function getCount() {
-            toggleButtons(false);
-            fetch("/api/Notifications/GetUnsentCount")
-                .then((res) => res.json())
-                .then(showCount);
-        }
-        function sendAll() {
-            toggleButtons(false);
-            fetch("/api/Notifications/SendAllUnsent").then((res) =>
-                res.ok ? showCount(0) : alert("Error sending notifications")
-            );
-        }
-        function showCount(count) {
-            localStorage.setItem("unsent-count", count);
-            document.getElementById("unsent-count").textContent = count;
-            toggleButtons(true);
-            if (count == 0)
-                buttons[1].disabled = true;
-        }
-        function toggleButtons(enabled) {
-            for (const button of buttons) button.disabled = !enabled;
-        }
+      const unsentCount = localStorage.getItem("unsent-count");
+      if (unsentCount !== null) {
+        showCount(unsentCount);
+        sendAllBtn.disabled = unsentCount == 0;
+      } else getCount();
+
+      const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/NotificationsHub")
+        .build();
+      connection.on("RemainingNotificationsCount", showCount);
+      connection.start();
+
+      async function getCount() {
+        refreshBtn.disabled = sendAllBtn.disabled = true;
+        const res = await fetch("/api/Notifications/GetUnsentCount");
+        const count = await res.json();
+        showCount(count);
+        refreshBtn.disabled = false;
+        sendAllBtn.disabled = count == 0;
+      }
+
+      async function sendAll() {
+        refreshBtn.disabled = sendAllBtn.disabled = true;
+        const res = await fetch("/api/Notifications/SendAllUnsent");
+        if (!res.ok) alert((await res.text()) || "Error sending notifications");
+        refreshBtn.disabled = false;
+      }
+
+      function showCount(count) {
+        localStorage.setItem("unsent-count", count);
+        unsentCountEl.textContent = count;
+      }
     </script>
-</body>
+  </body>
 </html>

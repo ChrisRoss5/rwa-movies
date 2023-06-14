@@ -36,6 +36,7 @@ namespace RwaMovies.Services
             var _body = new BodyBuilder { HtmlBody = body };
             mail.From.Add(new MailboxAddress(_settings.DisplayName, _settings.From));
             mail.To.Add(MailboxAddress.Parse(receiverMail));
+            mail.ReplyTo.Add(new MailboxAddress(_settings.DisplayName, _settings.From));
             mail.Subject = subject ?? "RwaMovies";
             mail.Body = _body.ToMessageBody();
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
