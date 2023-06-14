@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.SharedModels;
-using RwaMovies.DALModels;
 using RwaMovies.Services;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Controllers.API
 {

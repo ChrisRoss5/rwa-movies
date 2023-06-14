@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
-using RwaMovies.DALModels;
 using System.Linq.Dynamic.Core;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Services
 {

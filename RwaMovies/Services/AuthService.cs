@@ -4,11 +4,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using RwaMovies.DALModels;
-using RwaMovies.SharedModels.Auth;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Web;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared.Auth;
 
 namespace RwaMovies.Services
 {

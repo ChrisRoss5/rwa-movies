@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
-using RwaMovies.DALModels;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Services
 {
-	public interface IGenresService
+    public interface IGenresService
     {
         Task<IEnumerable<GenreDTO>> GetGenres();
         Task<GenreDTO> GetGenre(int id);

@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
-using RwaMovies.DALModels;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Services
 {
-	public interface ITagsService
+    public interface ITagsService
     {
         Task<IEnumerable<TagDTO>> GetTags();
         Task<TagDTO> GetTag(int id);

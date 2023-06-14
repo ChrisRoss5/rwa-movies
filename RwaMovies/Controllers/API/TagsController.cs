@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
 using RwaMovies.Services;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Controllers.API
 {

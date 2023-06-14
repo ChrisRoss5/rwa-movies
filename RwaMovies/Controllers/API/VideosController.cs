@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RwaMovies.SharedModels;
 using RwaMovies.Services;
 using RwaMovies.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Controllers.API
 {

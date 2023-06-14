@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using RwaMovies.Services;
-using RwaMovies.SharedModels.Auth;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper;
-using RwaMovies.DALModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared.Auth;
 
 namespace RwaMovies.Controllers.Views
 {

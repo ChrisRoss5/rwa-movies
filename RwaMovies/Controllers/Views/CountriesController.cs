@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using RwaMovies.SharedModels;
-using RwaMovies.DALModels;
-using RwaMovies.ViewModels;
+using RwaMovies.Models.Views;
+using RwaMovies.Models.DAL;
+using RwaMovies.Models.Shared;
 
 namespace RwaMovies.Controllers.Views
 {
