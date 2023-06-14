@@ -1,4 +1,4 @@
-﻿@model RwaMovies.Models.Country
+﻿@model CountryDTO
 
 @{
     ViewData["Title"] = "Delete country";
@@ -10,6 +10,7 @@
 
 <div>
     <dl class="row">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Code)
         </dt>

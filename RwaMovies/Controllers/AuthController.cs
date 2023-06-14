@@ -152,15 +152,15 @@ namespace RwaMovies.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(NewPasswordRequest request)
+        public async Task<IActionResult> ChangePassword(NewPasswordRequest newPasswordRequest)
         {
             ModelState.Remove("AuthRequest.Username");
-            request.AuthRequest.Username = HttpContext.User.Identity?.Name!;
+            newPasswordRequest.AuthRequest.Username = HttpContext.User.Identity?.Name!;
             if (!ModelState.IsValid)
-                return View(request);
+                return View(newPasswordRequest);
             try
             {
-                await _authService.ChangePassword(request);
+                await _authService.ChangePassword(newPasswordRequest);
                 TempData["IsSuccess"] = true;
                 return RedirectToAction(nameof(ChangePassword));
             }
@@ -168,8 +168,14 @@ namespace RwaMovies.Controllers
             {
                 ModelState.AddModelError("",
                     ex.Message == "Incorrect username or password" ? "Incorrect current password" : ex.Message);
-                return View(request);
+                return View(newPasswordRequest);
             }
+        }
+        public IActionResult AccessDenied(string? returnUrl = null)
+        {
+            if (returnUrl != null)
+                ViewBag.Message = $"Only administrators can access {returnUrl}";
+            return View();
         }
 
         private bool IsAuthenticated() => HttpContext.User.Identity?.IsAuthenticated ?? false;

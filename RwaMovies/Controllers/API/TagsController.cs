@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using RwaMovies.DTOs;
 using RwaMovies.Exceptions;
 using RwaMovies.Services;
 
 namespace RwaMovies.Controllers.API
 {
-    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Route("api/[controller]"), Area("API")]
     [ApiController]
     public class TagsController : ControllerBase
     {
@@ -36,6 +39,7 @@ namespace RwaMovies.Controllers.API
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTag(int id, TagDTO tagDTO)
         {
@@ -44,36 +48,25 @@ namespace RwaMovies.Controllers.API
             try
             {
                 await _tagsService.PutTag(id, tagDTO);
-                return NoContent();
+                return Ok();
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                if (ex is DbUpdateException)
-                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+                return NotFound();
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostTag(TagDTO tagDTO)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            try
-            {
-                var tagId = await _tagsService.PostTag(tagDTO);
-                return CreatedAtAction("GetTag", new { id = tagId });
-            }
-            catch (Exception ex)
-            {
-                if (ex is DbUpdateException)
-                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
-            }
+            var tagId = await _tagsService.PostTag(tagDTO);
+            return CreatedAtAction("GetTag", new { id = tagId });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTag(int id)
         {
@@ -86,9 +79,9 @@ namespace RwaMovies.Controllers.API
             {
                 if (ex is NotFoundException)
                     return NotFound();
-                if (ex is DbUpdateException)
-                    return StatusCode(StatusCodes.Status500InternalServerError, "DbUpdateException!");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Unknown error!");
+                if (ex.InnerException is SqlException sqlEx && sqlEx.Message.Contains("FK_Video_Tag"))
+                    return Conflict();
+                throw;
             }
         }
     }

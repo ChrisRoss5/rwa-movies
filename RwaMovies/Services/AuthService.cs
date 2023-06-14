@@ -8,9 +8,7 @@ using RwaMovies.Models;
 using RwaMovies.DTOs.Auth;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using System.Web;
-using static System.Net.WebRequestMethods;
 
 namespace RwaMovies.Services
 {
@@ -58,8 +56,9 @@ namespace RwaMovies.Services
                     Subject = "Confirm your email — RwaMovies",
                     Body = $"Click <a href=\"{confirmUrl}\">here</a> to confirm your email."
                 };
-                _context.Notifications.Add(notification);
                 await _mail.Send(notification.ReceiverEmail, notification.Subject, notification.Body);
+                notification.SentAt = DateTime.UtcNow;
+                _context.Notifications.Add(notification);
             }
             else
                 user.IsConfirmed = true;

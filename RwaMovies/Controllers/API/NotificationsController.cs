@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
@@ -7,7 +10,8 @@ using RwaMovies.Services;
 
 namespace RwaMovies.Controllers.API
 {
-    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [Route("api/[controller]"), Area("API")]
     [ApiController]
     public class NotificationsController : ControllerBase
     {
@@ -47,14 +51,14 @@ namespace RwaMovies.Controllers.API
                 var notification = _mapper.Map<Notification>(notificationRequest);
                 _context.Entry(notification).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                return Ok();
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
                 if (!NotificationExists(id))
                     return NotFound();
                 throw;
             }
-            return NoContent();
         }
 
         [HttpPost]
@@ -77,23 +81,25 @@ namespace RwaMovies.Controllers.API
             return NoContent();
         }
 
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet("[action]")]
         public async Task<ActionResult> GetUnsentCount()
         {
             return Ok(await _context.Notifications.CountAsync(x => !x.SentAt.HasValue));
         }
 
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet("[action]")]
         public async Task<ActionResult> SendAllUnsent()
         {
             var notifications = await _context.Notifications.Where(x => !x.SentAt.HasValue).ToListAsync();
-            foreach (var notification in notifications.Take(1))
+            foreach (var notification in notifications)
             {
                 await _mail.Send(notification.ReceiverEmail, notification.Subject, notification.Body);
                 notification.SentAt = DateTime.Now;
             }
             await _context.SaveChangesAsync();
-            return Ok();
+            return Ok("Success");
         }
 
         private bool NotificationExists(int id)

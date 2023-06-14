@@ -6,7 +6,6 @@ using RwaMovies.Models;
 using RwaMovies.Services;
 using RwaMovies.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
 
 namespace RwaMovies.Controllers
 {
@@ -149,16 +148,16 @@ namespace RwaMovies.Controllers
             }
             catch (Exception ex)
             {
+                if (ex is NotFoundException)
+                    return NotFound();
                 if (ex.InnerException is SqlException sqlEx && sqlEx.Message.Contains("FK_Video_Genre"))
                 {
-                    ModelState.AddModelError("", "Cannot delete genre because it is used in a video.");
+                    ModelState.AddModelError("", "Cannot delete genre because it is used in one or more videos.");
                     var genre = await _genresService.GetGenre(id);
                     if (Request.IsAjaxRequest())
                         return PartialView(genre);
                     return View(genre);
                 }
-                if (ex is NotFoundException)
-                    return NotFound();
                 throw;
             }
         }

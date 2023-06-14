@@ -1,13 +1,8 @@
 ﻿using AutoMapper;
-using Azure.Core;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Org.BouncyCastle.Asn1.IsisMtt.Ocsp;
 using RwaMovies.DTOs;
 using RwaMovies.DTOs.Auth;
 using RwaMovies.Models;
 using RwaMovies.Services;
-using System.Security.Claims;
-using System.Security.Cryptography;
 
 
 namespace RwaMovies.Mappers
@@ -26,6 +21,8 @@ namespace RwaMovies.Mappers
             CreateMap<GenreDTO, Genre>();
             CreateMap<Tag, TagDTO>();
             CreateMap<TagDTO, Tag>();
+            CreateMap<Country, CountryDTO>();
+            CreateMap<CountryDTO, Country>();
             CreateMap<NotificationRequest, Notification>()
                 .ForMember(d => d.CreatedAt, o => o.MapFrom(u => DateTime.UtcNow));
             CreateMap<UserRequest, User>()

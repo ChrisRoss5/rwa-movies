@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Access denied!";
+}
+
+<div class="alert alert-danger">
+    <strong>Access denied!</strong> 
+    @if (ViewBag.Message != null)
+    {
+        <br />
+        @ViewBag.Message
+    }
+</div>

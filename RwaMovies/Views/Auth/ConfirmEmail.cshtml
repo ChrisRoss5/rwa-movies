@@ -1,4 +1,8 @@
-﻿<div class="text-center alert @(ViewBag.Success ? "alert-success" : "alert-danger")">
+﻿@{
+    ViewData["Title"] = "Email Confirmed";
+}
+
+<div class="text-center alert @(ViewBag.Success ? "alert-success" : "alert-danger")">
     @ViewBag.Message
 </div>
 @if (ViewBag.Success)

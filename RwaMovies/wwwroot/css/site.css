@@ -30,3 +30,7 @@ a {
 .icon {
     width: 1rem !important;
 }
+
+.navbar-brand {
+    font-weight: 600;
+}

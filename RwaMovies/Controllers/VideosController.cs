@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Exceptions;
 using RwaMovies.Extensions;
@@ -55,11 +54,9 @@ namespace RwaMovies.Controllers
             {
                 return View(await _videosService.GetVideo(id));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -82,8 +79,17 @@ namespace RwaMovies.Controllers
             }
             if (videoFormVM.ImageFile != null)
             {
-                videoFormVM.VideoRequest.ImageId =
-                    await _imagesService.PostImage(videoFormVM.ImageFile);
+                try
+                {
+                    videoFormVM.VideoRequest.ImageId =
+                        await _imagesService.PostImage(videoFormVM.ImageFile);
+                }
+                catch (BadRequestException)
+                {
+                    ModelState.AddModelError(nameof(videoFormVM.ImageFile), "Invalid image upload.");
+                    await PopulateVideosViewBag();
+                    return View(videoFormVM);
+                }
             }
             int videoId = await _videosService.PostVideo(videoFormVM.VideoRequest);
             return RedirectToAction(nameof(Details), new { id = videoId });
@@ -101,11 +107,9 @@ namespace RwaMovies.Controllers
                     VideoRequest = _mapper.Map<VideoRequest>(videoResponse),
                 });
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -139,11 +143,15 @@ namespace RwaMovies.Controllers
                 await _videosService.PutVideo(id, videoFormVM.VideoRequest);
                 return RedirectToAction(nameof(Details), new { id });
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
+            }
+            catch (BadRequestException)
+            {
+                ModelState.AddModelError(nameof(videoFormVM.ImageFile), "Invalid image upload.");
+                await PopulateVideosViewBag();
+                return View(videoFormVM);
             }
         }
 
@@ -154,11 +162,9 @@ namespace RwaMovies.Controllers
             {
                 return View(await _videosService.GetVideo(id));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -172,11 +178,9 @@ namespace RwaMovies.Controllers
                 await _videosService.DeleteVideo(id);
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
         private async Task PopulateVideosViewBag()

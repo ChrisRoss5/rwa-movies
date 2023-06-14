@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs;
 using RwaMovies.Exceptions;
 using RwaMovies.Models;
@@ -36,11 +29,9 @@ namespace RwaMovies.Controllers
             {
                 return View(await _tagsService.GetTag(id));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -68,11 +59,9 @@ namespace RwaMovies.Controllers
             {
                 return View(await _tagsService.GetTag(id));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -90,11 +79,9 @@ namespace RwaMovies.Controllers
                 await _tagsService.PutTag(id, tagDTO);
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -105,11 +92,9 @@ namespace RwaMovies.Controllers
             {
                 return View(await _tagsService.GetTag(id));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
 
@@ -123,12 +108,9 @@ namespace RwaMovies.Controllers
                 await _tagsService.DeleteTag(id);
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch (NotFoundException)
             {
-                //Todo
-                if (ex is NotFoundException)
-                    return NotFound();
-                throw;
+                return NotFound();
             }
         }
     }

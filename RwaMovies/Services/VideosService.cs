@@ -110,7 +110,6 @@ namespace RwaMovies.Services
                     var newVideoTags = videoRequest.TagIds.Select(x => new VideoTag { VideoId = id, TagId = x });
                     _context.VideoTags.AddRange(newVideoTags);
                 }
-                var state = _context.Entry(video).State;
                 _context.Entry(video).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }

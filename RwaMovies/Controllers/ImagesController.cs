@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RwaMovies.Models;
 using RwaMovies.Services;
 
 namespace RwaMovies.Controllers
 {
-	public class ImagesController : Controller
+    public class ImagesController : Controller
 	{
 		private readonly IImagesService _imagesService;
 

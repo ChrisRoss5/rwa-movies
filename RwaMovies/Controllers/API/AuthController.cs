@@ -1,19 +1,14 @@
-﻿using AutoMapper;
-using Azure.Identity;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using RwaMovies.DTOs.Auth;
-using RwaMovies.Exceptions;
 using RwaMovies.Models;
 using RwaMovies.Services;
-using System.Numerics;
-using System.Security.Cryptography;
 
 namespace RwaMovies.Controllers.API
 {
-    [Route("api/[controller]")]
+    [AllowAnonymous]
+    [Route("api/[controller]"), Area("API")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -24,7 +19,7 @@ namespace RwaMovies.Controllers.API
             _authService = authService;
         }
 
-        /*[HttpPost("[action]")]
+        [HttpPost("[action]")]
         public async Task<ActionResult<User>> Register(UserRequest userRequest)
         {
             if (!ModelState.IsValid)
@@ -36,16 +31,18 @@ namespace RwaMovies.Controllers.API
             }
             catch (InvalidOperationException ex)
             {
-                return StatusCode(StatusCodes.Status401Unauthorized, ex.Message);
+                return BadRequest(ex.Message);
             }
-        }*/
+        }
 
         [HttpPost("[action]")]
-        public async Task<ActionResult<string>> GetJwtToken(AuthRequest request)
+        public async Task<ActionResult<string>> GetJwtToken(AuthRequest authRequest)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
-                return Ok(await _authService.GetJwtToken(request));
+                return Ok(await _authService.GetJwtToken(authRequest));
             }
             catch (InvalidOperationException ex)
             {
@@ -53,18 +50,20 @@ namespace RwaMovies.Controllers.API
             }
         }
 
-        /*[HttpPost("[action]")] todo
-        public async Task<ActionResult> ChangePassword(NewPasswordRequest request)
+        [HttpPost("[action]")]
+        public async Task<ActionResult> ChangePassword(NewPasswordRequest newPasswordRequest)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
-                await _authService.ChangePassword(request);
+                await _authService.ChangePassword(newPasswordRequest);
                 return Ok();
             }
             catch (InvalidOperationException ex)
             {
                 return StatusCode(StatusCodes.Status401Unauthorized, ex.Message);
             }
-        }*/
+        }
     }
 }

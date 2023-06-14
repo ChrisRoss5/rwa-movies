@@ -1,12 +1,14 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RwaMovies.Models;
 using RwaMovies.Services;
+using System.Net;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +68,18 @@ builder.Services
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        // https://github.com/dotnet/aspnetcore/issues/9039
+        options.Events.OnRedirectToLogin = (ctx) => OnRedirectHandler(in ctx, (int)HttpStatusCode.Unauthorized);
+        options.Events.OnRedirectToAccessDenied = (ctx) => OnRedirectHandler(in ctx, (int)HttpStatusCode.Forbidden);
+        static Task<int> OnRedirectHandler(in RedirectContext<CookieAuthenticationOptions> ctx, int statusCode)
+        {
+            if (ctx.Request.Path.StartsWithSegments("/api"))
+                ctx.Response.StatusCode = statusCode;
+            else
+                ctx.Response.Redirect(ctx.RedirectUri);
+            return Task.FromResult(0);
+        }
     });
 builder.Services.AddAuthorization(options =>
 {
@@ -96,7 +110,17 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles(new StaticFileOptions
+{
+    RequestPath = "/StaticFiles",
+    FileProvider = new PhysicalFileProvider(
+           Path.Combine(builder.Environment.ContentRootPath, "StaticFiles")),
+    OnPrepareResponse = (ctx) =>
+    {
+        if (!ctx.Context.User.IsInRole("Admin"))
+            ctx.Context.Response.Redirect("/Auth/AccessDenied?ReturnUrl=" + ctx.Context.Request.Path);
+    }
+});
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Videos}/{action=Index}/{id?}"

@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications</title>
+    <style>
+        body {
+            display: grid;
+            place-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        body,
+        button {
+            font: 1.5rem system-ui;
+        }
+
+        #container {
+            border: 1px solid #ccc;
+            padding: 2rem;
+        }
+
+        #message {
+            margin-bottom: 2rem;
+        }
+
+        #buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        button {
+            flex: 1;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <a href="/">↩ Return</a>
+    <div id="container">
+        <div id="message">
+            Number of unsent notifications: <span id="unsent-count"></span>
+        </div>
+        <div id="buttons-container">
+            <button onclick="getCount()">Refresh</button>
+            <button onclick="sendAll()">Send All</button>
+        </div>
+    </div>
+
+    <script>
+        const buttons = document.querySelectorAll("button");
+        const unsentCount = localStorage.getItem("unsent-count");
+        unsentCount !== null ? showCount(unsentCount) : getCount();
+
+        function getCount() {
+            toggleButtons(false);
+            fetch("/api/Notifications/GetUnsentCount")
+                .then((res) => res.json())
+                .then(showCount);
+        }
+        function sendAll() {
+            toggleButtons(false);
+            fetch("/api/Notifications/SendAllUnsent").then((res) =>
+                res.ok ? showCount(0) : alert("Error sending notifications")
+            );
+        }
+        function showCount(count) {
+            localStorage.setItem("unsent-count", count);
+            document.getElementById("unsent-count").textContent = count;
+            toggleButtons(true);
+            if (count == 0)
+                buttons[1].disabled = true;
+        }
+        function toggleButtons(enabled) {
+            for (const button of buttons) button.disabled = !enabled;
+        }
+    </script>
+</body>
+</html>

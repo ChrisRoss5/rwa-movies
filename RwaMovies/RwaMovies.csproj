@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="StaticFiles\Notifications.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\css\site.css" />
     <None Include="wwwroot\favicon.ico" />
     <None Include="wwwroot\images\no_image_placeholder.png" />
     <None Include="wwwroot\images\play-logo.png" />
-    <None Include="wwwroot\js\site.js" />
     <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css" />
     <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
     <None Include="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
