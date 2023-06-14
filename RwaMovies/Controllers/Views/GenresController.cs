@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.Services;
 using RwaMovies.Extensions;
 using Microsoft.AspNetCore.Authorization;

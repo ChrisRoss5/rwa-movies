@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.Services;
 using System.Net;
 using System.Text;

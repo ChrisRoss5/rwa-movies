@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.SharedModels.Auth;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;

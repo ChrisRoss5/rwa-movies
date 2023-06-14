@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.SharedModels.Auth;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.Services;
 using RwaMovies.ViewModels;
 

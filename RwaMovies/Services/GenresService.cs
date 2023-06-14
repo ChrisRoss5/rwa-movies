@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 
 namespace RwaMovies.Services
 {

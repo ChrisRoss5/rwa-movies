@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace RwaMovies.Models;
+namespace RwaMovies.DALModels;
 
 public partial class RwaMoviesContext : DbContext
 {

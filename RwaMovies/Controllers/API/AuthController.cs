@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RwaMovies.SharedModels.Auth;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.Services;
 
 namespace RwaMovies.Controllers.API

@@ -1,4 +1,4 @@
-﻿namespace RwaMovies.Models;
+﻿namespace RwaMovies.DALModels;
 
 public partial class Image
 {

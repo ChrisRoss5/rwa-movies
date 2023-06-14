@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.Exceptions;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 
 namespace RwaMovies.Services
 {

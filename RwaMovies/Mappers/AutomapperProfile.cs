@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using RwaMovies.SharedModels;
 using RwaMovies.SharedModels.Auth;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.Services;
 
 

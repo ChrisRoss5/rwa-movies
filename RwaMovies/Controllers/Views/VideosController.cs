@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
 using RwaMovies.Extensions;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using RwaMovies.Services;
 using RwaMovies.ViewModels;
 

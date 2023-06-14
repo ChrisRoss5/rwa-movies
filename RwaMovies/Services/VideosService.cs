@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RwaMovies.SharedModels;
 using RwaMovies.Exceptions;
-using RwaMovies.Models;
+using RwaMovies.DALModels;
 using System.Linq.Dynamic.Core;
 
 namespace RwaMovies.Services
