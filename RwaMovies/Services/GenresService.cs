@@ -44,8 +44,8 @@ namespace RwaMovies.Services
         {
             try
             {
-                var genre = _mapper.Map<Genre>(genreDTO);
-                _context.Entry(genre).State = EntityState.Modified;
+                var genre = await _context.Genres.FindAsync(id);
+                _mapper.Map(genreDTO, genre);
                 await _context.SaveChangesAsync();
             }
             catch

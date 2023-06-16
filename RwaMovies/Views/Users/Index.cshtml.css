@@ -1,0 +1,39 @@
+﻿@media (max-width: 576px) {
+
+    table {
+        overflow: hidden;
+    }
+
+    tbody tr {
+        position: relative;
+    }
+
+    tbody td:last-child {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 0;
+        background: white;
+        transform: translateX(100%);
+        transition: transform 250ms;
+    }
+
+        tbody td:last-child:hover {
+            transform: none;
+        }
+
+            tbody td:last-child:hover::before {
+                opacity: 0;
+            }
+
+        tbody td:last-child::before {
+            content: "☰";
+            position: absolute;
+            left: -2rem;
+            top: 50%;
+            padding: 0 1rem;
+            transform: translateY(-50%);
+            text-align: center;
+            font-weight: bold;
+        }
+}

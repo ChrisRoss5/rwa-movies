@@ -6,7 +6,7 @@
 
 <section class="d-flex align-items-center flex-wrap g-4">
     <partial name="_SectionTitle" />
-    <div id="form-container" class="ms-auto mt-md-0 mt-2 w-50">
+    <div id="filters-form-container" class="ms-auto mt-md-0 mt-2 w-50">
         <form asp-controller="Users" asp-action="Index" method="get" class="d-flex gap-2 flex-sm-nowrap flex-wrap">
             <input type="text" asp-for="FirstNameFilter" placeholder="First name..." class="form-control" />
             <input type="text" asp-for="LastNameFilter" placeholder="Last name..." class="form-control" />

@@ -44,8 +44,8 @@ namespace RwaMovies.Services
         {
             try
             {
-                var tag = _mapper.Map<Tag>(tagDTO);
-                _context.Entry(tag).State = EntityState.Modified;
+                var tag = await _context.Tags.FindAsync(id);
+                _mapper.Map(tagDTO, tag);
                 await _context.SaveChangesAsync();
             }
             catch

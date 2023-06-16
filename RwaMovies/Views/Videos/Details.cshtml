@@ -34,7 +34,7 @@
                 @Html.DisplayNameFor(model => model.Description)
             </dt>
             <dd class="col-sm-7">
-                @Html.DisplayFor(model => model.Description)
+                @Html.Raw(Model.Description?.Replace(Environment.NewLine, "<br/>") ?? "—")
             </dd>
             <dt class="col-sm-3">
                 @Html.DisplayNameFor(model => model.TotalSeconds)
@@ -58,7 +58,7 @@
                 @Html.DisplayNameFor(model => model.Tags)
             </dt>
             <dd class="col-sm-7">
-                @String.Join(", ", Model.Tags.Select(t => t.Name))
+                @(Model.Tags.Any() ? String.Join(", ", Model.Tags.Select(t => t.Name)) : "—")
             </dd>
         </dl>
         <a asp-action="Index" class="btn btn-secondary">Back to list</a>

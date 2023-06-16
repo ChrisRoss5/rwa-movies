@@ -44,11 +44,11 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PutGenre(int id, GenreDTO genreDTO)
         {
             if (!ModelState.IsValid || id != genreDTO.Id)
-                return BadRequest();
+                return BadRequest(ModelState);
             try
             {
                 await _genresService.PutGenre(id, genreDTO);
-                return Ok();
+                return NoContent();
             }
             catch (NotFoundException)
             {
@@ -61,7 +61,7 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PostGenre(GenreDTO genreDTO)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
+                return BadRequest(ModelState);
             var genreId = await _genresService.PostGenre(genreDTO);
             return CreatedAtAction("GetGenre", new { id = genreId });
         }

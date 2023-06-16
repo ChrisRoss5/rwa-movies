@@ -57,7 +57,7 @@ namespace RwaMovies.Controllers.API
             try
             {
                 await _authService.ChangePassword(newPasswordRequest);
-                return Ok();
+                return NoContent();
             }
             catch (InvalidOperationException ex)
             {

@@ -83,8 +83,8 @@ namespace RwaMovies.Controllers.Views
                 return View(countryDTO);
             try
             {
-                var country = _mapper.Map<Country>(countryDTO);
-                _context.Entry(country).State = EntityState.Modified;
+                var country = await _context.Countries.FindAsync(id);
+                _mapper.Map(countryDTO, country);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

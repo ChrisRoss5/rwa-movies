@@ -102,7 +102,8 @@ namespace RwaMovies.Services
         {
             try
             {
-                var video = _mapper.Map<Video>(videoRequest);
+                var video = await _context.Videos.FindAsync(id);
+                _mapper.Map(videoRequest, video);
                 var existingVideoTags = await _context.VideoTags.Where(vt => vt.VideoId == id).ToListAsync();
                 _context.VideoTags.RemoveRange(existingVideoTags);
                 if (videoRequest.TagIds != null)
@@ -110,7 +111,6 @@ namespace RwaMovies.Services
                     var newVideoTags = videoRequest.TagIds.Select(x => new VideoTag { VideoId = id, TagId = x });
                     _context.VideoTags.AddRange(newVideoTags);
                 }
-                _context.Entry(video).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch

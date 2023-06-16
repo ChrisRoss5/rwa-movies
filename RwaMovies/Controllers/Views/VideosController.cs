@@ -8,6 +8,7 @@ using RwaMovies.Services;
 using RwaMovies.Models.DAL;
 using RwaMovies.Models.Views;
 using RwaMovies.Models.Shared;
+using System.Diagnostics;
 
 namespace RwaMovies.Controllers.Views
 {
@@ -190,6 +191,14 @@ namespace RwaMovies.Controllers.Views
             var tags = await _tagsService.GetTags();
             ViewBag.Genres = new SelectList(genres, "Id", "Name");
             ViewBag.Tags = new SelectList(tags, "Id", "Name");
+        }
+
+        [Route("/Error")]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorVM { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

@@ -54,7 +54,7 @@ namespace RwaMovies.Controllers.API
             }
             catch (BadRequestException)
             {
-                return BadRequest();
+                return BadRequest("Invalid search parameters");
             }
         }
 
@@ -63,11 +63,11 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PutVideo(int id, VideoRequest videoRequest)
         {
             if (!ModelState.IsValid || id != videoRequest.Id)
-                return BadRequest();
+                return BadRequest(ModelState);
             try
             {
                 await _videosService.PutVideo(id, videoRequest);
-                return Ok();
+                return NoContent();
             }
             catch (NotFoundException)
             {
@@ -80,7 +80,7 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PostVideo(VideoRequest videoRequest)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
+                return BadRequest(ModelState);
             var videoId = await _videosService.PostVideo(videoRequest);
             return CreatedAtAction("GetVideo", new { id = videoId });
         }

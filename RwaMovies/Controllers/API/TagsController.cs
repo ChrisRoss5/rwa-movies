@@ -44,11 +44,11 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PutTag(int id, TagDTO tagDTO)
         {
             if (!ModelState.IsValid || id != tagDTO.Id)
-                return BadRequest();
+                return BadRequest(ModelState);
             try
             {
                 await _tagsService.PutTag(id, tagDTO);
-                return Ok();
+                return NoContent();
             }
             catch (NotFoundException)
             {
@@ -61,7 +61,7 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PostTag(TagDTO tagDTO)
         {
             if (!ModelState.IsValid)
-                return BadRequest();
+                return BadRequest(ModelState);
             var tagId = await _tagsService.PostTag(tagDTO);
             return CreatedAtAction("GetTag", new { id = tagId });
         }

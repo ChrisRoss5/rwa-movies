@@ -7,7 +7,7 @@ namespace RwaMovies.Models.Shared
         public int? Id { get; set; }
         [StringLength(256)]
         public string Name { get; set; } = null!;
-        [StringLength(1024)]
+        [StringLength(1024), DisplayFormat(NullDisplayText = "—")]
         public string? Description { get; set; }
     }
 }

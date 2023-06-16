@@ -10,7 +10,9 @@ namespace RwaMovies.Mappers
     {
         public AutomapperProfile()
         {
-            CreateMap<VideoRequest, Video>();
+            CreateMap<VideoRequest, Video>()
+                .ForMember(d => d.CreatedAt, o => o.MapFrom((u, d) =>
+                    d.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : d.CreatedAt));
             CreateMap<Video, VideoResponse>()
                 .ForMember(d => d.Tags, o => o.MapFrom(v => v.VideoTags.Select(vt => vt.Tag)));
             CreateMap<VideoResponse, VideoRequest>()
@@ -23,9 +25,11 @@ namespace RwaMovies.Mappers
             CreateMap<Country, CountryDTO>();
             CreateMap<CountryDTO, Country>();
             CreateMap<NotificationRequest, Notification>()
-                .ForMember(d => d.CreatedAt, o => o.MapFrom(u => DateTime.UtcNow));
+                .ForMember(d => d.CreatedAt, o => o.MapFrom((u, d) => 
+                    d.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : d.CreatedAt));
             CreateMap<UserRequest, User>()
-                .ForMember(d => d.CreatedAt, o => o.MapFrom(u => DateTime.UtcNow))
+                .ForMember(d => d.CreatedAt, o => o.MapFrom((u, d) =>
+                    d.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : d.CreatedAt))
                 .ForMember(d => d.Username, o => o.MapFrom(u => u.Username.Trim()))
                 .ForMember(d => d.PwdSalt, o =>
                 {

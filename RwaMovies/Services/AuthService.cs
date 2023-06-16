@@ -46,7 +46,7 @@ namespace RwaMovies.Services
             var user = _mapper.Map<User>(request);
             if (!isConfirmed)
             {
-                var confirmUrl = $"https://localhost:7116/Auth/ConfirmEmail?" + /*{_configuration["AppUrl"]} todo */
+                var confirmUrl = $"{_configuration["AppUrl"]}/Auth/ConfirmEmail?" +
                     $"username={HttpUtility.UrlEncode(user.Username)}&" +
                     $"b64SecToken={HttpUtility.UrlEncode(user.SecurityToken)}";
                 var notification = new Notification

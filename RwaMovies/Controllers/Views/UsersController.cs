@@ -115,9 +115,8 @@ namespace RwaMovies.Controllers.Views
             var user = await _context.Users.FindAsync(id);
             if (user == null)
                 return NotFound();
-            var modifiedUser = _mapper.Map(userRequest, user);
-            modifiedUser.IsConfirmed = userRequestAdmin.IsConfirmed;
-            _context.Entry(modifiedUser).State = EntityState.Modified;
+            _mapper.Map(userRequest, user);
+            user.IsConfirmed = userRequestAdmin.IsConfirmed;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

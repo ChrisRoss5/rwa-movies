@@ -49,13 +49,13 @@ namespace RwaMovies.Controllers.API
         public async Task<IActionResult> PutNotification(int id, NotificationRequest notificationRequest)
         {
             if (!ModelState.IsValid || id != notificationRequest.Id)
-                return BadRequest();
+                return BadRequest(ModelState);
             try
             {
-                var notification = _mapper.Map<Notification>(notificationRequest);
-                _context.Entry(notification).State = EntityState.Modified;
+                var notification = await _context.Notifications.FindAsync(id);
+                _mapper.Map(notificationRequest, notification);
                 await _context.SaveChangesAsync();
-                return Ok();
+                return NoContent();
             }
             catch
             {

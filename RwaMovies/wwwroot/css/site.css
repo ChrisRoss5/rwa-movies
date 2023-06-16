@@ -34,3 +34,10 @@ a {
 .navbar-brand {
     font-weight: 600;
 }
+
+@media (max-width: 768px) {
+    #filters-form-container,
+    #filters-form-container button {
+        width: 100% !important;
+    }
+}
