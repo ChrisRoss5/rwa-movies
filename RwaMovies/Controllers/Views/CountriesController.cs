@@ -64,6 +64,7 @@ namespace RwaMovies.Controllers.Views
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             var country = await _context.Countries.FindAsync(id);

@@ -171,6 +171,7 @@ namespace RwaMovies.Controllers.Views
                 return View(newPasswordRequest);
             }
         }
+
         public IActionResult AccessDenied(string? returnUrl = null)
         {
             if (returnUrl != null)
