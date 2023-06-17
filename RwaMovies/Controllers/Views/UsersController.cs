@@ -64,22 +64,22 @@ namespace RwaMovies.Controllers.Views
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UserRequestAdminVM userRequestAdmin)
+        public async Task<IActionResult> Create(UserRequest userRequest)
         {
             if (!ModelState.IsValid)
             {
                 await PopulateUsersViewBag();
-                return View(userRequestAdmin);
+                return View(userRequest);
             }
             try
             {
-                await _authService.Register(userRequestAdmin.UserRequest, userRequestAdmin.IsConfirmed);
+                await _authService.Register(userRequest);
             }
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError("", ex.Message);
                 await PopulateUsersViewBag();
-                return View(userRequestAdmin);
+                return View(userRequest);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -90,18 +90,13 @@ namespace RwaMovies.Controllers.Views
             if (user == null)
                 return NotFound();
             await PopulateUsersViewBag();
-            return View(new UserRequestAdminVM
-            {
-                UserRequest = _mapper.Map<UserRequest>(user),
-                IsConfirmed = user.IsConfirmed
-            });
+            return View(_mapper.Map<UserRequest>(user));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UserRequestAdminVM userRequestAdmin)
+        public async Task<IActionResult> Edit(int id, UserRequest userRequest)
         {
-            var userRequest = userRequestAdmin.UserRequest;
             if (id != userRequest.Id)
                 return NotFound();
             var passwordsMatch = userRequest.Password1 == userRequest.Password2;
@@ -110,13 +105,12 @@ namespace RwaMovies.Controllers.Views
                 if (!passwordsMatch)
                     ModelState.AddModelError("", "Passwords do not match.");
                 await PopulateUsersViewBag();
-                return View(userRequestAdmin);
+                return View(userRequest);
             }
             var user = await _context.Users.FindAsync(id);
             if (user == null)
                 return NotFound();
             _mapper.Map(userRequest, user);
-            user.IsConfirmed = userRequestAdmin.IsConfirmed;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

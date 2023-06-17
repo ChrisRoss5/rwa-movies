@@ -21,7 +21,7 @@ namespace RwaMovies.Models.Shared.Auth
         public string Email { get; set; } = null!;
         [Phone, StringLength(256)]
         public string? Phone { get; set; }
-        [DisplayName("Is confirmed")]
+        [DisplayName("User confirmed")]
         public bool IsConfirmed { get; set; }
         [DisplayName("Country of residence")]
         public int CountryOfResidenceId { get; set; }

@@ -99,6 +99,7 @@ namespace RwaMovies.Controllers.Views
             }
             try
             {
+                userRequest.IsConfirmed = false;
                 await _authService.Register(userRequest);
                 TempData["RegisteredMessage"] = $"An email has been sent to {userRequest.Email}. Please confirm your email address to complete registration.";
                 return RedirectToAction(nameof(Login));

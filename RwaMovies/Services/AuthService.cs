@@ -14,12 +14,12 @@ namespace RwaMovies.Services
 {
     public interface IAuthService
     {
-        Task Register(UserRequest request, bool isConfirmed = false);
+        Task Register(UserRequest userRequest);
         Task ConfirmEmail(string username, string b64SecToken);
-        Task<User> GetUser(AuthRequest request);
+        Task<User> GetUser(AuthRequest authRequest);
         string GetRole(User user);
-        Task<string> GetJwtToken(AuthRequest request);
-        Task ChangePassword(NewPasswordRequest request);
+        Task<string> GetJwtToken(AuthRequest authRequest);
+        Task ChangePassword(NewPasswordRequest newPasswordRequest);
     }
     public class AuthService : IAuthService
     {
@@ -36,15 +36,15 @@ namespace RwaMovies.Services
             _mail = mail;
         }
 
-        public async Task Register(UserRequest request, bool isConfirmed = false)
+        public async Task Register(UserRequest userRequest)
         {
-            if (request.Password1 != request.Password2)
+            if (userRequest.Password1 != userRequest.Password2)
                 throw new InvalidOperationException("Passwords do not match");
             if (await _context.Users.AnyAsync(
-                u => u.Username.ToLower() == request.Username.ToLower().Trim()))
+                u => u.Username.ToLower() == userRequest.Username.ToLower().Trim()))
                 throw new InvalidOperationException("Username already exists");
-            var user = _mapper.Map<User>(request);
-            if (!isConfirmed)
+            var user = _mapper.Map<User>(userRequest);
+            if (!userRequest.IsConfirmed)
             {
                 var confirmUrl = $"{_configuration["AppUrl"]}/Auth/ConfirmEmail?" +
                     $"username={HttpUtility.UrlEncode(user.Username)}&" +
@@ -52,7 +52,7 @@ namespace RwaMovies.Services
                 var notification = new Notification
                 {
                     CreatedAt = DateTime.UtcNow,
-                    ReceiverEmail = request.Email,
+                    ReceiverEmail = userRequest.Email,
                     Subject = "Confirm your email",
                     Body = $"Please click <a href=\"{confirmUrl}\">here</a> to confirm your email and complete registration."
                 };
@@ -76,14 +76,14 @@ namespace RwaMovies.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<User> GetUser(AuthRequest request)
+        public async Task<User> GetUser(AuthRequest authRequest)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == authRequest.Username);
             if (user == null)
                 throw new InvalidOperationException("Incorrect username or password");
             byte[] salt = Convert.FromBase64String(user.PwdSalt);
             byte[] hash = Convert.FromBase64String(user.PwdHash);
-            byte[] calcHash = AuthUtils.HashPassword(request.Password, salt);
+            byte[] calcHash = AuthUtils.HashPassword(authRequest.Password, salt);
             if (!hash.SequenceEqual(calcHash))
                 throw new InvalidOperationException("Incorrect username or password");
             if (user.DeletedAt != null)
@@ -99,9 +99,9 @@ namespace RwaMovies.Services
             return user.Username.ToLower() == "admin" ? "Admin" : "User";
         }
 
-        public async Task<string> GetJwtToken(AuthRequest request)
+        public async Task<string> GetJwtToken(AuthRequest authRequest)
         {
-            var user = await GetUser(request);
+            var user = await GetUser(authRequest);
             var jwtKey = _configuration["JWT:Key"]!;
             var jwtKeyBytes = Encoding.UTF8.GetBytes(jwtKey);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -114,7 +114,7 @@ namespace RwaMovies.Services
                 }),
                 Issuer = _configuration["JWT:Issuer"],
                 Audience = _configuration["JWT:Audience"],
-                Expires = DateTime.UtcNow.AddMinutes(10),
+                Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(jwtKeyBytes),
                     SecurityAlgorithms.HmacSha256Signature)
@@ -125,14 +125,15 @@ namespace RwaMovies.Services
             return serializedToken;
         }
 
-        public async Task ChangePassword(NewPasswordRequest request)
+        public async Task ChangePassword(NewPasswordRequest newPasswordRequest)
         {
-            if (request.NewPassword1 != request.NewPassword2)
+            if (newPasswordRequest.NewPassword1 != newPasswordRequest.NewPassword2)
                 throw new InvalidOperationException("Passwords don't match");
-            var user = await GetUser(request.AuthRequest);
+            var user = await GetUser(newPasswordRequest.AuthRequest);
             byte[] salt = AuthUtils.GenerateSalt();
             user.PwdSalt = Convert.ToBase64String(salt);
-            user.PwdHash = Convert.ToBase64String(AuthUtils.HashPassword(request.NewPassword1, salt));
+            user.PwdHash = Convert.ToBase64String(
+                AuthUtils.HashPassword(newPasswordRequest.NewPassword1, salt));
             await _context.SaveChangesAsync();
         }
     }

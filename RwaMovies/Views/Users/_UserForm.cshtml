@@ -1,17 +1,17 @@
-﻿@model UserRequestAdminVM
+﻿@model UserRequest
 
 <div class="row">
     <div class="col-md-4">
         <form asp-action="@ViewBag.Action">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="UserRequest.Username" class="control-label"></label>
-                <input asp-for="UserRequest.Username" class="form-control" />
-                <span asp-validation-for="UserRequest.Username" class="text-danger"></span>
+                <label asp-for="Username" class="control-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             @if (ViewBag.Action == "Edit")
             {
-                <label class="control-label">@Html.DisplayNameFor(model => model.UserRequest.Password1)</label>
+                <label class="control-label">@Html.DisplayNameFor(model => model.Password1)</label>
                 <select id="password-select" class="form-select">
                     <option value="keep">Keep Password</option>
                     <option value="change">Change Password</option>
@@ -20,50 +20,50 @@
             <fieldset id="password-fieldset"
             @(ViewBag.Action == "Edit" ? Html.Raw("class='border-start border-secondary ps-3 ms-3' style='display: none'") : "")>
                 <div class="form-group">
-                    <label asp-for="UserRequest.Password1" class="control-label"></label>
-                    <input asp-for="UserRequest.Password1" class="form-control" />
-                    <span asp-validation-for="UserRequest.Password1" class="text-danger"></span>
+                    <label asp-for="Password1" class="control-label"></label>
+                    <input asp-for="Password1" class="form-control" />
+                    <span asp-validation-for="Password1" class="text-danger"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="UserRequest.Password2" class="control-label"></label>
-                    <input asp-for="UserRequest.Password2" class="form-control" />
-                    <span asp-validation-for="UserRequest.Password2" class="text-danger"></span>
+                    <label asp-for="Password2" class="control-label"></label>
+                    <input asp-for="Password2" class="form-control" />
+                    <span asp-validation-for="Password2" class="text-danger"></span>
                 </div>
             </fieldset>
             <div class="form-group">
-                <label asp-for="UserRequest.FirstName" class="control-label"></label>
-                <input asp-for="UserRequest.FirstName" class="form-control" />
-                <span asp-validation-for="UserRequest.FirstName" class="text-danger"></span>
+                <label asp-for="FirstName" class="control-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UserRequest.LastName" class="control-label"></label>
-                <input asp-for="UserRequest.LastName" class="form-control" />
-                <span asp-validation-for="UserRequest.LastName" class="text-danger"></span>
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UserRequest.Email" class="control-label"></label>
-                <input asp-for="UserRequest.Email" class="form-control" />
-                <span asp-validation-for="UserRequest.Email" class="text-danger"></span>
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UserRequest.Phone" class="control-label"></label>
-                <input asp-for="UserRequest.Phone" class="form-control" />
-                <span asp-validation-for="UserRequest.Phone" class="text-danger"></span>
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="UserRequest.CountryOfResidenceId" class="control-label"></label>
-                <select asp-for="UserRequest.CountryOfResidenceId" class="form-control" asp-items="ViewBag.CountryOfResidenceId"></select>
+                <label asp-for="CountryOfResidenceId" class="control-label"></label>
+                <select asp-for="CountryOfResidenceId" class="form-control" asp-items="ViewBag.CountryOfResidenceId"></select>
             </div>
             <hr />
             <div class="form-group form-check">
                 <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsConfirmed" /> @Html.DisplayNameFor(model => model.IsConfirmed)
+                    <input asp-for="IsConfirmed" class="form-check-input" /> @Html.DisplayNameFor(model => model.IsConfirmed)
                 </label>
             </div>
             <div class="form-group mt-3">
                 @if (@ViewBag.Action == "Edit")
                 {
-                    <input type="hidden" asp-for="@Model.UserRequest.Id" />
+                    <input type="hidden" asp-for="@Model.Id" />
                 }
                 else
                 {

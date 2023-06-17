@@ -16,9 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<RwaMoviesContext>(options =>
-    options.UseSqlServer("name=ConnectionStrings:" +
-        (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
-            ? "RwaMoviesConnStrProd" : "RwaMoviesConnStr")));
+    options.UseSqlServer("name=ConnectionStrings:RwaMoviesConnStr"));
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -93,7 +91,8 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
-builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+builder.Services.Configure<MailSettings>(
+    builder.Configuration.GetSection(builder.Configuration["TargetMailSettings"]));
 builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVideosService, VideosService>();
@@ -106,7 +105,17 @@ builder.WebHost.UseStaticWebAssets();  // Necessary for production
 var app = builder.Build();
 if (app.Environment.IsProduction())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler(c => c.Run(async context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+            await context.Response.WriteAsJsonAsync(new
+            {
+                message = "A fatal error occurred",
+                details = "An unexpected information was passed as parameter to the API."
+            });
+        else
+            context.Response.Redirect("/Error");
+    }));
     app.UseHsts();
 }
 app.UseSwagger();

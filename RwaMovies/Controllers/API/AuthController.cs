@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RwaMovies.Services;
-using RwaMovies.Models.DAL;
 using RwaMovies.Models.Shared.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace RwaMovies.Controllers.API
 {
     [AllowAnonymous]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]"), Area("API")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -19,12 +20,14 @@ namespace RwaMovies.Controllers.API
         }
 
         [HttpPost("[action]")]
-        public async Task<ActionResult<User>> Register(UserRequest userRequest)
+        public async Task<ActionResult<string>> Register(UserRequest userRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             try
             {
+                if (!User.IsInRole("Admin") && userRequest.IsConfirmed)
+                    return StatusCode(StatusCodes.Status403Forbidden, "Only admins can create confirmed users.");
                 await _authService.Register(userRequest);
                 return Ok($"An email has been sent to {userRequest.Email}. Please confirm your email address to complete registration.");
             }
@@ -50,7 +53,7 @@ namespace RwaMovies.Controllers.API
         }
 
         [HttpPost("[action]")]
-        public async Task<ActionResult> ChangePassword(NewPasswordRequest newPasswordRequest)
+        public async Task<IActionResult> ChangePassword(NewPasswordRequest newPasswordRequest)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

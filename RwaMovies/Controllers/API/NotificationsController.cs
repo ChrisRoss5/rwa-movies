@@ -66,7 +66,7 @@ namespace RwaMovies.Controllers.API
         }
 
         [HttpPost]
-        public async Task<ActionResult<Notification>> PostNotification(NotificationRequest notificationRequest)
+        public async Task<IActionResult> PostNotification(NotificationRequest notificationRequest)
         {
             var notification = _mapper.Map<Notification>(notificationRequest);
             _context.Notifications.Add(notification);
@@ -87,14 +87,14 @@ namespace RwaMovies.Controllers.API
 
         [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet("[action]")]
-        public async Task<ActionResult> GetUnsentCount()
+        public async Task<ActionResult<int>> GetUnsentCount()
         {
             return Ok(await _context.Notifications.CountAsync(x => !x.SentAt.HasValue));
         }
 
         [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet("[action]")]
-        public async Task<ActionResult> SendAllUnsent()
+        public async Task<ActionResult<string>> SendAllUnsent()
         {
             if (isSending)
                 return BadRequest("Notifications are already being sent.");
