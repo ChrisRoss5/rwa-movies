@@ -11,5 +11,6 @@ namespace RwaMovies.Models.Shared
         public string? Subject { get; set; }
         [StringLength(1024)]
         public string Body { get; set; } = null!;
+        public DateTime? SentAt { get; set; }
     }
 }

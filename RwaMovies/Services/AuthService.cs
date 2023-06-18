@@ -54,7 +54,8 @@ namespace RwaMovies.Services
                     CreatedAt = DateTime.UtcNow,
                     ReceiverEmail = userRequest.Email,
                     Subject = "Confirm your email",
-                    Body = $"Please click <a href=\"{confirmUrl}\">here</a> to confirm your email and complete registration."
+                    Body = $"Hi {user.Username}, please click <a href=\"{confirmUrl}\">here</a> " +
+                        $"to confirm your email and complete registration."
                 };
                 await _mail.Send(notification.ReceiverEmail, notification.Subject, notification.Body);
                 notification.SentAt = DateTime.UtcNow;

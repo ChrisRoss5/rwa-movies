@@ -92,7 +92,7 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 builder.Services.Configure<MailSettings>(
-    builder.Configuration.GetSection(builder.Configuration["TargetMailSettings"]));
+    builder.Configuration.GetSection(builder.Configuration["TargetMailSettings"] ?? "MailSettings"));
 builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVideosService, VideosService>();
