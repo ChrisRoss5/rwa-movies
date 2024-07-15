@@ -1,0 +1,47 @@
+# This Dockerfile is used to build the image for the Cloud Run deployment.
+# It's a combination of Dockerfile.sqlserver and Dockerfile.webapp,
+# but with manual installation of the ASP.NET Core runtime on top of the SQL Server image.
+
+# App
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /source
+
+COPY *.sln .
+COPY RwaMovies/*.csproj ./RwaMovies/
+RUN dotnet restore
+
+COPY RwaMovies/. ./RwaMovies/
+WORKDIR /source/RwaMovies
+RUN dotnet publish -c release -o /aspnet-app --no-restore
+
+# SQL Server
+FROM mcr.microsoft.com/mssql/server:2019-latest
+WORKDIR /aspnet-app
+USER root
+
+ARG SA_PASSWORD=strongPassword!
+ARG PORT=7116
+
+RUN apt-get update \
+    && apt-get install -y wget \
+    && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && apt-get update \
+    && apt-get install -y aspnetcore-runtime-6.0
+
+ENV ACCEPT_EULA y
+ENV SA_PASSWORD $SA_PASSWORD
+ENV ConnectionStrings__RwaMoviesConnStr "Server=.;Database=RwaMovies;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
+ENV ASPNETCORE_URLS=http://+:${PORT}
+
+# For Cloud Run
+ENV PORT $PORT
+# ENV HOST 0.0.0.0
+
+COPY --from=build /aspnet-app .
+COPY /*.sql .
+COPY /*.sh .
+
+VOLUME /var/opt/mssql
+
+ENTRYPOINT ["./entrypoint.cloudrun.sh"]

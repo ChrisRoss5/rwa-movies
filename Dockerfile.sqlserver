@@ -1,0 +1,10 @@
+# https://hub.docker.com/r/microsoft/mssql-server
+FROM mcr.microsoft.com/mssql/server:2019-latest
+
+ENV ACCEPT_EULA y
+ENV SA_PASSWORD strongPassword!
+
+COPY *.sql .
+COPY *.sh .
+
+ENTRYPOINT ["./entrypoint.sqlserver.sh"]

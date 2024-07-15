@@ -1,0 +1,29 @@
+# https://docs.docker.com/go/compose-spec-reference/
+
+name: rwa-movies
+
+services:
+  sqlserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.sqlserver
+    ports:
+      - "1433:1433"
+    networks:
+      - mynetwork
+
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile.webapp
+    environment:
+      ConnectionStrings__RwaMoviesConnStr: "Server=sqlserver;Database=RwaMovies;User Id=sa;Password=strongPassword!;TrustServerCertificate=True;"
+    ports:
+      - "7116:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:

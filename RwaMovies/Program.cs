@@ -13,6 +13,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// For Cloud Run
+Console.WriteLine("[Program.cs] CONN STRING: " + builder.Configuration["ConnectionStrings:RwaMoviesConnStr"]);
+Console.WriteLine("[Program.cs] ENVIRONMENT: " + builder.Environment.EnvironmentName);
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<RwaMoviesContext>(options =>
@@ -131,4 +135,27 @@ app.MapControllerRoute(
     pattern: "{controller=Videos}/{action=Index}/{id?}"
 );
 
+Task.Run(() =>
+{
+    while (true)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<RwaMoviesContext>();
+            try
+            {
+                dbContext.Database.OpenConnection();
+                dbContext.Database.CloseConnection();
+                Console.WriteLine("[Program.cs] Successfully connected to the database.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Program.cs] Failed to connect to the database: {ex.Message}");
+            }
+        }
+        Thread.Sleep(5000);
+    }
+});
+
 app.Run();
+
