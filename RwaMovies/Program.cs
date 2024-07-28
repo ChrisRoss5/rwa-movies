@@ -13,7 +13,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// For Cloud Run
+// Cloud run debugging:
 Console.WriteLine("[Program.cs] CONN STRING: " + builder.Configuration["ConnectionStrings:RwaMoviesConnStr"]);
 Console.WriteLine("[Program.cs] ENVIRONMENT: " + builder.Environment.EnvironmentName);
 
@@ -135,7 +135,8 @@ app.MapControllerRoute(
     pattern: "{controller=Videos}/{action=Index}/{id?}"
 );
 
-Task.Run(() =>
+/* Cloud run debugging: */
+/* Task.Run(() =>
 {
     while (true)
     {
@@ -155,7 +156,7 @@ Task.Run(() =>
         }
         Thread.Sleep(5000);
     }
-});
+}); */
 
 app.Run();
 

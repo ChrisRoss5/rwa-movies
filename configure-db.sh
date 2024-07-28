@@ -30,6 +30,3 @@ echo "SQL Server setup completed"
 
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i seed.sql
 echo "SQL Server seed completed"
-
-#dotnet RwaMovies.dll
-#echo "App started successfully"

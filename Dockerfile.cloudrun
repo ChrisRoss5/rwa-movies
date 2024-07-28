@@ -31,17 +31,17 @@ RUN apt-get update \
 
 ENV ACCEPT_EULA y
 ENV SA_PASSWORD $SA_PASSWORD
+ENV MSSQL_TCP_PORT 1433
 ENV ConnectionStrings__RwaMoviesConnStr "Server=.;Database=RwaMovies;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
 ENV ASPNETCORE_URLS=http://+:${PORT}
 
 # For Cloud Run
 ENV PORT $PORT
-# ENV HOST 0.0.0.0
 
 COPY --from=build /aspnet-app .
 COPY /*.sql .
 COPY /*.sh .
 
-VOLUME /var/opt/mssql
+VOLUME /var/opt/mssql/data
 
 ENTRYPOINT ["./entrypoint.cloudrun.sh"]
