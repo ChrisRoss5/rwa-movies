@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: Dockerfile.webapp
     environment:
-      ConnectionStrings__RwaMoviesConnStr: "Server=sqlserver;Database=RwaMovies;User Id=sa;Password=strongPassword!;TrustServerCertificate=True;"
+      ConnectionStrings__RwaMoviesConnStr: "Server=.;Database=RwaMovies;User Id=sa;Password=strongPassword!;TrustServerCertificate=True;"
     ports:
       - "7116:80"
     depends_on:

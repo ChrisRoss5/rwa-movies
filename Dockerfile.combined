@@ -44,4 +44,4 @@ COPY /*.sh .
 
 VOLUME /var/opt/mssql/data
 
-ENTRYPOINT ["./entrypoint.cloudrun.sh"]
+ENTRYPOINT ["./entrypoint.combined.sh"]

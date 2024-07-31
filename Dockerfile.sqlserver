@@ -3,8 +3,16 @@ FROM mcr.microsoft.com/mssql/server:2019-latest
 
 ENV ACCEPT_EULA y
 ENV SA_PASSWORD strongPassword!
+ENV SERVER_NAME localhost
+ENV INIT_TIMEOUT 10
 
 COPY *.sql .
 COPY *.sh .
+
+# Not needed for Cloud Run
+# VOLUME /var/opt/mssql
+
+# For Cloud Run
+ENV PORT=1433
 
 ENTRYPOINT ["./entrypoint.sqlserver.sh"]
